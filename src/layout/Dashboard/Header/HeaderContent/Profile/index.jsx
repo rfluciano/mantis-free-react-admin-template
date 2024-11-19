@@ -30,6 +30,10 @@ import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import UserOutlined from '@ant-design/icons/UserOutlined';
 import avatar1 from 'assets/images/users/avatar-1.png';
 
+// context
+import { useStateContext } from '../../../../../contexts/contextProvider'; // Adjust the path to your context
+import { handleLogout } from './Logout'; // Import logout function
+
 // tab panel wrapper
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -51,6 +55,8 @@ function a11yProps(index) {
 export default function Profile() {
   const theme = useTheme();
 
+  const { user } = useStateContext(); // Extract user data from context
+  const logout = () => handleLogout();
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
   const handleToggle = () => {
@@ -91,7 +97,7 @@ export default function Profile() {
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ p: 0.5 }}>
           <Avatar alt="profile user" src={avatar1} size="sm" />
           <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
-            John Doe
+            {user.employee.name || 'Doe'} {user.employee.firstname || 'John'}
           </Typography>
         </Stack>
       </ButtonBase>
@@ -124,16 +130,16 @@ export default function Profile() {
                         <Stack direction="row" spacing={1.25} alignItems="center">
                           <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                           <Stack>
-                            <Typography variant="h6">John Doe</Typography>
+                            <Typography variant="h6">{user.employee.firstname || 'Doe'} {user.employee.name || 'John'}</Typography> {/* Replace with user name */}
                             <Typography variant="body2" color="text.secondary">
-                              UI/UX Designer
+                              {user.employee.position.title || 'UI/UX Designer'} {/* Replace with user position */}
                             </Typography>
                           </Stack>
                         </Stack>
                       </Grid>
                       <Grid item>
                         <Tooltip title="Logout">
-                          <IconButton size="large" sx={{ color: 'text.primary' }}>
+                          <IconButton size="large" sx={{ color: 'text.primary' }} onClick={() => logout()} >
                             <LogoutOutlined />
                           </IconButton>
                         </Tooltip>
@@ -152,28 +158,13 @@ export default function Profile() {
                           textTransform: 'capitalize'
                         }}
                         icon={<UserOutlined style={{ marginBottom: 0, marginRight: '10px' }} />}
-                        label="Profile"
+                        label="Profil"
                         {...a11yProps(0)}
                       />
-                      <Tab
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          textTransform: 'capitalize'
-                        }}
-                        icon={<SettingOutlined style={{ marginBottom: 0, marginRight: '10px' }} />}
-                        label="Setting"
-                        {...a11yProps(1)}
-                      />
-                    </Tabs>
+                     </Tabs>
                   </Box>
                   <TabPanel value={value} index={0} dir={theme.direction}>
                     <ProfileTab />
-                  </TabPanel>
-                  <TabPanel value={value} index={1} dir={theme.direction}>
-                    <SettingTab />
                   </TabPanel>
                 </MainCard>
               </ClickAwayListener>

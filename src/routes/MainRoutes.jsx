@@ -1,51 +1,88 @@
-import { lazy } from 'react';
+import { lazy, useEffect } from 'react';
 
 // project import
 import Loadable from 'components/Loadable';
 import Dashboard from 'layout/Dashboard';
-
-const Color = Loadable(lazy(() => import('pages/component-overview/color')));
-const Typography = Loadable(lazy(() => import('pages/component-overview/typography')));
-const Shadow = Loadable(lazy(() => import('pages/component-overview/shadows')));
+import { element } from 'prop-types';
+import Employee from 'pages/employee';
+import History from 'pages/history';
+import Notification from 'pages/notification';
+import User from 'pages/user';
+import Resource from 'pages/resource';
+import Unity from 'pages/unity';
+import Position from 'pages/position';
+import Profile from 'pages/profile';
+import RequestPage from 'pages/request';
+import { useNavigate } from 'react-router';
+import { useStateContext } from 'contexts/contextProvider';
+import Recieve from 'pages/request/Receive';
+import Sent from 'pages/request/Sent';
+import Myresources from 'pages/resource/myresources';
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/index')));
 
-// render - sample page
-const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
-
-// ==============================|| MAIN ROUTING ||============================== //
-
 const MainRoutes = {
-  path: '/',
+  path: '/admin',
   element: <Dashboard />,
   children: [
     {
-      path: '/',
+      path: '/admin/dashboard',
       element: <DashboardDefault />
     },
     {
-      path: 'color',
-      element: <Color />
+      path: '/admin',
+      element: <DashboardDefault />
     },
     {
-      path: 'dashboard',
-      children: [
-        {
-          path: 'default',
-          element: <DashboardDefault />
-        }
-      ]
+      path: '/admin/employee',
+      element: <Employee/>
     },
     {
-      path: 'sample-page',
-      element: <SamplePage />
+      path: '/admin/history',
+      element: <History/>
     },
     {
-      path: 'shadow',
-      element: <Shadow />
+      path: '/admin/notification',
+      element:<Notification/>
     },
     {
-      path: 'typography',
-      element: <Typography />
+      path:'/admin/user',
+      element:<User/>
+    },
+    {
+      path:'/admin/resource',
+      element:<Resource/>
+    },
+    {
+      path:'/admin/unity',
+      element:<Unity/>
+    },
+    {
+      path:'/admin/position',
+      element:<Position/>
+    },
+    {
+      path:'/admin/request',
+      element:<RequestPage/>
+    },
+    {
+      path:'/admin/profile',
+      element:<Profile/>
+    },
+    {
+      path: '/admin/request/received',
+      element: <Recieve />
+    },
+    {
+      path: '/admin/request/sent',
+      element: <Sent />
+    },
+    {
+      path: '/admin/resource/myresources',
+      element: <Myresources />
+    },
+    {
+      path: '/admin/resource/allresources',
+      element: <Resource />
     }
   ]
 };

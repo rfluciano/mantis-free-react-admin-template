@@ -20,7 +20,7 @@ export default function UniqueVisitorCard() {
     <>
       <Grid container alignItems="center" justifyContent="space-between">
         <Grid item>
-          <Typography variant="h5">Unique Visitor</Typography>
+          <Typography variant="h5">Rapport Ressource-Recrue</Typography>
         </Grid>
         <Grid item>
           <Stack direction="row" alignItems="center" spacing={0}>
@@ -30,7 +30,7 @@ export default function UniqueVisitorCard() {
               color={slot === 'month' ? 'primary' : 'secondary'}
               variant={slot === 'month' ? 'outlined' : 'text'}
             >
-              Month
+              Mois
             </Button>
             <Button
               size="small"
@@ -38,7 +38,7 @@ export default function UniqueVisitorCard() {
               color={slot === 'week' ? 'primary' : 'secondary'}
               variant={slot === 'week' ? 'outlined' : 'text'}
             >
-              Week
+              Semaine
             </Button>
           </Stack>
         </Grid>

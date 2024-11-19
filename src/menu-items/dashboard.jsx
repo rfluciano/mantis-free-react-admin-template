@@ -1,24 +1,67 @@
 // assets
-import { DashboardOutlined } from '@ant-design/icons';
-
+import DashboardOutlinedIcon from '@mui/icons-material/Dashboard'; 
+import {DashboardOutlined as DashboardOutlined2} from '@mui/icons-material';  // ou DashboardOutlinedIcon
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import { DashboardOutlined, InboxOutlined, DatabaseOutlined } from '@ant-design/icons';
 // icons
 const icons = {
-  DashboardOutlined
+  DashboardOutlined2,
+  DatabaseOutlined,
+  InboxOutlined,
+  NotificationsOutlinedIcon,
+  DashboardOutlined,
+  DashboardOutlinedIcon
 };
 
 // ==============================|| MENU ITEMS - DASHBOARD ||============================== //
 
 const dashboard = {
   id: 'group-dashboard',
-  title: 'Navigation',
+  title: 'Suivis et Ressource',
   type: 'group',
   children: [
     {
       id: 'dashboard',
-      title: 'Dashboard',
+      title: 'Tableau de bord',
       type: 'item',
-      url: '/dashboard/default',
+      url: '/admin/dashboard',
       icon: icons.DashboardOutlined,
+      breadcrumbs: false
+    },
+    {
+      id: 'resource',
+      title: 'Ressources',
+      type: 'item',
+      url: '/admin/resource',
+      icon: icons.DashboardOutlined2,
+      breadcrumbs: false,
+      // children: [
+      //   {
+      //     id: 'myresources',
+      //     title: 'Mes Ressources',
+      //     type: 'item',
+      //     url: '/admin/resource/myresources',
+      //     icon: icons.InboxOutlined,
+      //     breadcrumbs: false
+      //   }
+      //   ,
+      //   {
+      //     id: 'allresources',
+      //     title: 'Toutes les Ressources',
+      //     type: 'item',
+      //     url: '/admin/resource/allresources',
+      //     icon: icons.DatabaseOutlined,
+      //     breadcrumbs: false
+          
+      //   }
+      // ]
+    },
+    {
+      id: 'notification',
+      title: 'Notifications',
+      type: 'item',
+      url: '/admin/notification',
+      icon: icons.NotificationsOutlinedIcon,
       breadcrumbs: false
     }
   ]

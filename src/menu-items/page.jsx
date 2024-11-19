@@ -1,34 +1,96 @@
 // assets
-import { LoginOutlined, ProfileOutlined } from '@ant-design/icons';
+import { LoginOutlined, ProfileOutlined, PullRequestOutlined,MailOutlined,SendOutlined, UserOutlined, ClusterOutlined, DesktopOutlined } from '@ant-design/icons';  
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+import DashboardOutlinedIcon from '@mui/icons-material/Dashboard';  // ou DashboardOutlinedIcon
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTree';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 
-// icons
 const icons = {
+  MailOutlined,
+  SendOutlined,
+  BusinessCenterIcon,
+  ClusterOutlined,
+  DashboardOutlinedIcon,
+  WorkOutlineIcon,
+  PullRequestOutlined,
+  UserOutlined,
   LoginOutlined,
-  ProfileOutlined
+  ProfileOutlined,
+  DesktopOutlined
 };
 
 // ==============================|| MENU ITEMS - EXTRA PAGES ||============================== //
 
 const pages = {
   id: 'authentication',
-  title: 'Authentication',
+  title: 'Employé et requête',
   type: 'group',
   children: [
     {
-      id: 'login1',
-      title: 'Login',
+      id: 'request',
+      title: 'Requêtes',
       type: 'item',
-      url: '/login',
-      icon: icons.LoginOutlined,
-      target: true
+        url: '/admin/request',
+      icon: icons.PullRequestOutlined,
+      target: false,
+      breadcrumbs: false,
+      // children: [
+      //   {
+      //     id: 'received',
+      //     title: 'Requêtes Reçues',
+      //     type: 'item',
+      //     url: '/admin/request/received',
+      //     icon: icons.MailOutlined,
+      //     breadcrumbs: false
+      //   },
+      //   {
+      //     id: 'sent',
+      //     title: 'Requêtes Envoyées',
+      //     type: 'item',
+      //     url: '/admin/request/sent',
+      //     icon: icons.SendOutlined,
+      //     breadcrumbs: false
+      //   }
+      // ]
     },
     {
-      id: 'register1',
-      title: 'Register',
+      id: 'user',
+      title: 'Utilisateurs',
       type: 'item',
-      url: '/register',
-      icon: icons.ProfileOutlined,
-      target: true
+      url: '/admin/user',
+      icon: icons.UserOutlined,
+      target: false,
+      breadcrumbs: false
+    },
+    {
+      id: 'employee',
+      title: 'Employés',
+      type: 'item',
+      url: '/admin/employee',
+      icon: icons.WorkOutlineIcon,
+      target: false,
+      breadcrumbs: false
+
+    },
+    {
+      id: 'unity',
+      title: 'Unités',
+      type: 'item',
+      url: '/admin/unity',
+      icon: icons.ClusterOutlined,
+      target: false,
+      breadcrumbs: false
+
+    },
+    {
+      id: 'position',
+      title: 'Postes',
+      type: 'item',
+      url: '/admin/position',
+      icon: icons.DesktopOutlined,
+      target: false,
+      breadcrumbs: false
+
     }
   ]
 };
