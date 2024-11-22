@@ -48,7 +48,8 @@ const headCells = [
   { id: 'discriminator', align: 'left', label: 'Type' },
   { id: 'description', align: 'left', label: 'Description' },
   { id: 'isavailable', align: 'left', label: 'Disponibilité' },
-  { id: 'id_user_chief', align: 'left', label: 'Propriétaire' },
+  { id: 'id_user_chief', align: 'left', label: 'Responsable' },
+  { id: 'id_user_holder', align: 'left', label: 'Propriétaire' },
   { id: 'action', align: 'left', label: '' },
 ];
 
@@ -224,10 +225,11 @@ export default function ResourceTable() {
                   </TableCell>
                   <TableCell>{resource.id_resource}</TableCell>
                   <TableCell>{resource.label}</TableCell>
-                  <TableCell>{resource.discriminator === 'access' ? 'Accès' : 'Equipement'}</TableCell>
+                  <TableCell>{resource.discriminator === 'Accès' ? 'Accès' : 'Equipement'}</TableCell>
                   <TableCell>{resource.description}</TableCell>
                   <TableCell><AvailabilityIndicator isavailable={resource.isavailable} /></TableCell>
                   <TableCell>{resource.id_user_chief}</TableCell>
+                  <TableCell>{resource.id_user_holder}</TableCell>
                   <TableCell><LongMenu employeeId={resource.id_resource} /></TableCell>
                 </TableRow>
               );

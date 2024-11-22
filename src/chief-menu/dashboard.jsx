@@ -32,7 +32,6 @@ const dashboard = {
       id: 'resource',
       title: 'Ressources',
       type: 'item',
-      // url: '/resource',
       icon: icons.DashboardOutlined2,
       breadcrumbs: false,
       children: [

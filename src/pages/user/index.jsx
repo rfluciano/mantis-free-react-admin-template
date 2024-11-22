@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
-import Ajouter from './Ajouter';
+import AjouterUtilisateur from './Ajouter';
 import UserTable from './UserTable';
 import UserFilter from './UserFilter';
 
@@ -18,7 +18,7 @@ import SearchInput from './SearchInput';
 import ExportPopover from './ExportPopover';
 import ImportPopover from './ImportPopover';
 
-export default function Sent() {
+export default function User() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,7 +57,7 @@ export default function Sent() {
           />
 
           {/* Ajouter Button */}
-          <Ajouter />
+          <AjouterUtilisateur />
 
           {/* Filter Button */}
           <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>

@@ -32,7 +32,8 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 
 // context
 import { useStateContext } from '../../../../../contexts/contextProvider'; // Adjust the path to your context
-import { handleLogout } from './Logout'; // Import logout function
+// import { handleLogout } from './Logout'; // Import logout function
+import { useNavigate } from 'react-router';
 
 // tab panel wrapper
 function TabPanel({ children, value, index, ...other }) {
@@ -55,8 +56,11 @@ function a11yProps(index) {
 export default function Profile() {
   const theme = useTheme();
 
-  const { user } = useStateContext(); // Extract user data from context
-  const logout = () => handleLogout();
+  const navigate = useNavigate();
+  const { setUser,logout, setToken, user } = useStateContext(); // Context hooks used inside the component
+
+  
+  
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
   const handleToggle = () => {
@@ -97,7 +101,7 @@ export default function Profile() {
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ p: 0.5 }}>
           <Avatar alt="profile user" src={avatar1} size="sm" />
           <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
-            {user.employee.name || 'Doe'} {user.employee.firstname || 'John'}
+            {user?.username || 'John Doe'}
           </Typography>
         </Stack>
       </ButtonBase>
@@ -130,18 +134,18 @@ export default function Profile() {
                         <Stack direction="row" spacing={1.25} alignItems="center">
                           <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                           <Stack>
-                            <Typography variant="h6">{user.employee.firstname || 'Doe'} {user.employee.name || 'John'}</Typography> {/* Replace with user name */}
+                            <Typography variant="h6">{user?.employee.firstname || 'Doe'} {user?.employee.name || 'John'}</Typography> {/* Replace with user name */}
                             <Typography variant="body2" color="text.secondary">
-                              {user.employee.position.title || 'UI/UX Designer'} {/* Replace with user position */}
+                              {user?.employee.position.title || 'UI/UX Designer'} {/* Replace with user position */}
                             </Typography>
                           </Stack>
                         </Stack>
                       </Grid>
                       <Grid item>
                         <Tooltip title="Logout">
-                          <IconButton size="large" sx={{ color: 'text.primary' }} onClick={() => logout()} >
+                        <IconButton size="large" sx={{ color: 'text.primary' }} onClick={() => { console.log('Logout clicked'); logout(); }}>
                             <LogoutOutlined />
-                          </IconButton>
+                        </IconButton>
                         </Tooltip>
                       </Grid>
                     </Grid>

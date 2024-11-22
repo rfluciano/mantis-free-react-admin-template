@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
-import Ajouter from './Ajouter';
+import AjouterRessource from './AjouterRessource';
 import ResourceTable from './ResourceTable';
 import ResourceFilter from './ResourceFilter';
 
@@ -56,8 +56,8 @@ export default function Resources() {
             isSmallScreen={isSmallScreen} 
           />
 
-          {/* Ajouter Button */}
-          <Ajouter />
+          {/* AjouterRessource Button */}
+          <AjouterRessource />
 
           {/* Filter Button */}
           <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>

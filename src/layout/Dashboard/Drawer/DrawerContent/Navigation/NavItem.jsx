@@ -38,11 +38,8 @@ export default function NavItem({ item, level }) {
 
   const { pathname } = useLocation();
   const isChildActive = item.children && item.children.some(child => child.url && matchPath({ path: child.url, end: false }, pathname));
-  const isSelected = Boolean(
-    (item.url && matchPath({ path: item.url, end: true }, pathname)) || 
-    (!isChildActive && openItem === item.id)
-  );
-  
+  const isSelected = (item.url && matchPath({ path: item.url, end: true }, pathname)) || (!isChildActive && openItem === item.id);
+
   // active menu item on page load
   useEffect(() => {
     if (pathname === item.url) handlerActiveItem(item.id);
@@ -54,46 +51,43 @@ export default function NavItem({ item, level }) {
   return (
     <>
       <ListItemButton
-  onClick={handleClick}
-  disabled={item.disabled}
-  selected={Boolean(isSelected)} // Ensures boolean
-  sx={{
-    zIndex: 1201,
-    pl: drawerOpen ? `${level * 28}px` : 1.5,
-    py: !drawerOpen && level === 1 ? 1.25 : 1,
-    ...(drawerOpen && {
-      '&:hover': {
-        bgcolor: 'primary.lighter',
-      },
-      '&.Mui-selected': {
-        bgcolor: 'primary.lighter',
-        borderRight: `2px solid ${theme.palette.primary.main}`,
-        color: iconSelectedColor,
-        '&:hover': {
-          color: iconSelectedColor,
-          bgcolor: 'primary.lighter',
-        },
-      },
-    }),
-    ...(!drawerOpen && {
-      '&:hover': {
-        bgcolor: 'transparent',
-      },
-      '&.Mui-selected': {
-        '&:hover': {
-          bgcolor: 'transparent',
-        },
-        bgcolor: 'transparent',
-      },
-    }),
-  }}
-  component={
-    item.children
-      ? 'div'
-      : forwardRef((props, ref) => <Link ref={ref} {...props} to={item.url} />)
-  }
->
-
+        onClick={handleClick}
+        disabled={item.disabled}
+        selected={isSelected}
+        sx={{
+          zIndex: 1201,
+          pl: drawerOpen ? `${level * 28}px` : 1.5,
+          py: !drawerOpen && level === 1 ? 1.25 : 1,
+          ...(drawerOpen && {
+            '&:hover': {
+              bgcolor: 'primary.lighter'
+            },
+            '&.Mui-selected': {
+              bgcolor: 'primary.lighter',
+              borderRight: `2px solid ${theme.palette.primary.main}`,
+              color: iconSelectedColor,
+              '&:hover': {
+                color: iconSelectedColor,
+                bgcolor: 'primary.lighter'
+              }
+            }
+          }),
+          ...(!drawerOpen && {
+            '&:hover': {
+              bgcolor: 'transparent'
+            },
+            '&.Mui-selected': {
+              '&:hover': {
+                bgcolor: 'transparent'
+              },
+              bgcolor: 'transparent'
+            }
+          })
+        }}
+        component={item.children ? 'div' : forwardRef((props, ref) => (
+          <Link ref={ref} {...props} to={item.url} />
+        ))}
+      >
         {itemIcon && (
           <ListItemIcon
             sx={{

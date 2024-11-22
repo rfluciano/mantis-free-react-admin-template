@@ -20,26 +20,49 @@ import axis from 'axis';
 
 const headCells = [
   { id: 'id_request', align: 'left', label: 'ID Requête' },
-  { id: 'resource_label', align: 'left', label: 'Ressource concerné' },
-  { id: 'receiver_matricule', align: 'left', label: 'Destinataire' },
-  { id: 'status', align: 'left', label: 'Statut' },
-  { id: 'rejection_reason', align: 'left', label: 'Motif de rejet' },
-  { id: 'validation_date', align: 'left', label: 'Date de validation' },
-  { id: 'delivery_date', align: 'left', label: 'Date de livraison' },
+  { id: 'resource.label', align: 'left', label: 'Ressource concerné' },
+  { id: 'requester.matricule', align: 'left', label: 'Solliciteur' },
+  { id: 'beneficiary.matricule', align: 'left', label: 'Bénéficiaire' },
+  { id: 'validation.status', align: 'left', label: 'Statut' },
+  { id: 'validation.rejection_reason', align: 'left', label: 'Motif de rejet' },
+  { id: 'validation.validation_date', align: 'left', label: 'Date de validation' },
+  { id: 'validation.delivery_date', align: 'left', label: 'Date de livraison' },
   { id: 'action', align: 'center', label: 'Action' },
 ];
 
+
 function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) return -1;
-  if (b[orderBy] > a[orderBy]) return 1;
+  // Handle nested fields using dot notation
+  const keys = orderBy.split('.');
+  let valueA = a;
+  let valueB = b;
+
+  for (const key of keys) {
+    valueA = valueA ? valueA[key] : undefined;
+    valueB = valueB ? valueB[key] : undefined;
+  }
+
+  // Handle null or empty values
+  const isValueAEmpty = valueA === null || valueA === undefined || valueA === '';
+  const isValueBEmpty = valueB === null || valueB === undefined || valueB === '';
+
+  if (isValueAEmpty && !isValueBEmpty) return 1; // `a` is empty, place it lower
+  if (!isValueAEmpty && isValueBEmpty) return -1; // `b` is empty, place it lower
+  if (isValueAEmpty && isValueBEmpty) return 0; // Both are empty, treat as equal
+
+  // Standard descending comparison
+  if (valueB < valueA) return -1;
+  if (valueB > valueA) return 1;
   return 0;
 }
+
 
 function getComparator(order, orderBy) {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
+
 
 function RequestTableHead({ order, orderBy, onRequestSort }) {
   const createSortHandler = (property) => (event) => onRequestSort(event, property);
@@ -97,23 +120,12 @@ function StatusIndicator({ status }) {
   );
 }
 
-export default function ReceivedRequestTable() {
-  const [requests, setRequests] = useState([]);
-  const { user } = useStateContext();
+export default function ReceivedRequestTable({ requests }) {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id_request');
   const [page, setPage] = useState(1);
   const rowsPerPage = 9;
-
-  useEffect(() => {
-    axis.get(`/request/received/${user.id_user}`)
-      .then((response) => {
-        setRequests(response.data);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch requests:', error);
-      });
-  }, [user.id_user]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -129,7 +141,7 @@ export default function ReceivedRequestTable() {
   const handlePageChange = (event, newPage) => setPage(newPage);
 
   return (
-    <Box sx={{margin:-2.5, padding:0}}>
+    <Box sx={{ margin: -2.5, padding: 0 }}>
       <TableContainer>
         <Table>
           <RequestTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
@@ -141,7 +153,10 @@ export default function ReceivedRequestTable() {
                 </TableCell>
                 <TableCell>{request.resource?.label || ''}</TableCell>
                 <TableCell>
-                  {user.id_user === request.receiver?.id_user ? 'Moi' : request.receiver?.matricule || ''}
+                  {request.receiver?.matricule || ''}
+                </TableCell>
+                <TableCell>
+                  {request.beneficiary ?.matricule || ''}
                 </TableCell>
                 <TableCell>
                   <StatusIndicator status={request.validation?.status || 'pending'} />
@@ -169,6 +184,11 @@ export default function ReceivedRequestTable() {
     </Box>
   );
 }
+
+ReceivedRequestTable.propTypes = {
+  requests: PropTypes.array.isRequired,
+};
+
 
 RequestTableHead.propTypes = {
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,

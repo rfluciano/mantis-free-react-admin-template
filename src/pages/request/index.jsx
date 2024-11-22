@@ -1,41 +1,71 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Grid, 
   Typography, 
   useMediaQuery, 
   useTheme, 
   IconButton, 
-  Box 
+  Box, 
+  CircularProgress 
 } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
-import Ajouter from './Ajouter';
+import AjouterRequete from './Ajouter';
 import AllRequestTable from './AllRequestTable';
 import RequestFilter from './RequestFilter';
-
-// Modularized Components
 import SearchInput from './SearchInput';
 import ExportPopover from './ExportPopover';
 import ImportPopover from './ImportPopover';
+import axis from 'axis';
+import { useStateContext } from 'contexts/contextProvider';
 
-export default function Sent() {
-  const theme = useTheme(); // Access the theme
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // Use theme for breakpoint
+export default function Request() {
+  const { user } = useStateContext();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filteredRequests, setFilteredRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSearchChange = (event) => setSearchTerm(event.target.value);
+  const fetchFilteredRequests = async (query) => {
+    setIsLoading(true);
+    try {
+      let response;
+      if (query.trim() === '' || query.trim() === null) {
+        // Execute the default request when search query is empty
+        response = await axis.get(`/request`);
+      } else {
+        // Execute the search-specific request when a query exists
+        response = await axis.get('/request/search', { params: { query } });
+      }
+      setFilteredRequests(response.data);
+    } catch (error) {
+      console.error('Failed to fetch filtered requests:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
+  const handleSearchChange = (event) => {
+    const newSearchTerm = event.target.value;
+    setSearchTerm(newSearchTerm);
+    fetchFilteredRequests(newSearchTerm);
+  };
+
+  useEffect(() => {
+    fetchFilteredRequests('');
+  }, []);
 
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      {/* Header */}
       <Grid item xs={12}>
-        <Typography variant="h5" sx={{ mb: 0 }}>
-          Liste des requêtes envoyées
+        <Typography variant="h5" sx={{ mb: -1.5 }}>
+          Liste des requêtes
         </Typography>
       </Grid>
 
-      {/* Table Options */}
       <Grid item xs={12}>
         <Box
           display="flex"
@@ -49,30 +79,20 @@ export default function Sent() {
             mb: -3,
           }}
         >
-          {/* Search Input */}
           <SearchInput 
             searchTerm={searchTerm} 
             onSearchChange={handleSearchChange} 
             isSmallScreen={isSmallScreen} 
           />
-
-          {/* Ajouter Button */}
-          <Ajouter />
-
-          {/* Filter Button */}
+          <AjouterRequete />
           <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>
             <FilterList />
           </IconButton>
-
-          {/* Export Button */}
           <ExportPopover />
-
-          {/* Import Button */}
           <ImportPopover />
         </Box>
       </Grid>
 
-      {/* Request Table */}
       <Grid item xs={12}>
         <MainCard
           sx={{
@@ -83,11 +103,20 @@ export default function Sent() {
             },
           }}
         >
-          <AllRequestTable searchTerm={searchTerm} />
+          {isLoading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
+              <CircularProgress />
+            </Box>
+          ) : filteredRequests.length === 0 ? (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
+              <Typography variant="body1">Aucune donnée trouvée.</Typography>
+            </Box>
+          ) : (
+            <AllRequestTable requests={filteredRequests} />
+          )}
         </MainCard>
       </Grid>
 
-      {/* Request Filter Modal */}
       <RequestFilter open={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </Grid>
   );

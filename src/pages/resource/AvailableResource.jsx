@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
 import MainCard from 'components/MainCard';
-import Ajouter from './Ajouter';
+import Ajouter from './AjouterRessource';
 import ResourceTable from './ResourceTable';
 
 export default function AvailableResource() {

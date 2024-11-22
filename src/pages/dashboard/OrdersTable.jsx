@@ -22,7 +22,7 @@ const headCells = [
   { id: 'resource_label', align: 'left', label: 'Ressource concerné' },
   { id: 'receiver_matricule', align: 'left', label: 'Destinataire' },
   { id: 'requester_matricule', align: 'left', label: 'Soliciteur' },
-  { id: 'delivery_date', align: 'left', label: 'Date de livraison' },
+  { id: 'beneficiary.matricule', align: 'left', label: 'Bénéficiaire' },
   { id: 'status', align: 'left', label: 'Status' }
 ];
 
@@ -95,7 +95,7 @@ export default function RequestTable() {
         <Table aria-labelledby="tableTitle">
           <RequestTableHead />
           <TableBody>
-            {requests.map((request) => (
+          {requests.slice(0, 10).map((request) => ( // Only display the first 10 requests
               <TableRow key={request.id_request}>
                 <TableCell>
                   <Link color="secondary"> {request.id_request}</Link>
@@ -103,7 +103,7 @@ export default function RequestTable() {
                 <TableCell>{request.resource?.label || 'N/A'}</TableCell>
                 <TableCell>{request.receiver?.matricule || 'N/A'}</TableCell>
                 <TableCell>{request.requester?.matricule || 'N/A'}</TableCell>
-                <TableCell>{request.delivery_date || 'N/A'}</TableCell>
+                <TableCell>{request.beneficiary?.matricule || 'N/A'}</TableCell>
                 <TableCell>
                   <StatusIndicator status={request.validation?.status || 'pending'} />
                 </TableCell>

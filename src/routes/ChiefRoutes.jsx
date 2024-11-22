@@ -17,6 +17,8 @@ import ChiefDashboard from 'pages/chiefdashboard';
 import MyResources from 'pages/resource/myresources';
 import Resources from 'pages/resource';
 import AvailableResource from 'pages/resource/AvailableResource';
+import Receive from 'pages/request/Receive';
+import Sent from 'pages/request/Sent';
 
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/index')));
 
@@ -71,12 +73,12 @@ const ChiefRoutes = {
       element: <RequestPage />
     },
     {
-      path: 'request/received',
-      element: <RequestPage />
+      path: '/request/received',
+      element: <Receive />
     },
     {
-      path: 'request/sent',
-      element: <RequestPage />
+      path: '/request/sent',
+      element: <Sent />
     },
     {
       path: '/resource/myresources',

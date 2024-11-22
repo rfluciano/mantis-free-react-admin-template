@@ -1,7 +1,7 @@
-// src/contexts/ContextProvider.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 
 // Create a context
 const AuthContext = createContext();
@@ -11,7 +11,6 @@ export const ContextProvider = ({ children }) => {
   // Initialize user and token with values from localStorage, if available
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
-
   const messageSuccess = (msg) => {
     toast.success(msg, { style: { backgroundColor: 'green', color: 'white' } });
   };
@@ -30,6 +29,13 @@ export const ContextProvider = ({ children }) => {
     });
   };
 
+  // Logout function to clear user and token
+  const logout = () => {
+    setUser(null); // Clear user state
+    setToken(null); // Clear token state
+    messageSuccess('You have been logged out successfully!');
+  };
+
   // Update localStorage whenever user or token changes
   useEffect(() => {
     if (user) {
@@ -37,17 +43,28 @@ export const ContextProvider = ({ children }) => {
     } else {
       localStorage.removeItem('user');
     }
-  
+
     if (token) {
       localStorage.setItem('token', token);
     } else {
       localStorage.removeItem('token');
     }
   }, [user, token]);
-  
 
   return (
-    <AuthContext.Provider value={{ user, setUser, token, setToken, messageSuccess, messageDanger, messageError, displayErrors }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        token,
+        setToken,
+        logout,
+        messageSuccess,
+        messageDanger,
+        messageError,
+        displayErrors,
+      }}
+    >
       {children}
       <ToastContainer />
     </AuthContext.Provider>

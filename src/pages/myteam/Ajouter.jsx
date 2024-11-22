@@ -50,10 +50,10 @@ export default function Ajouter() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  useEffect(() => {
-    getpositions();
-    getunity();
-  });
+  // useEffect(() => {
+  //   getpositions();
+  //   getunity();
+  // });
   return (
     <div>
       <Button onClick={handleOpen}>Open modal</Button>

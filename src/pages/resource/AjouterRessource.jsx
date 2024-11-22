@@ -8,6 +8,8 @@ import {
   MenuItem,
   TextField,
   Grid,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import axis from 'axis';
 import { useEffect, useState } from 'react';
@@ -28,34 +30,34 @@ const style = (isSmallScreen, isVisible) => ({
   opacity: isVisible ? 1 : 0,
 });
 
-export default function AjouterRequete() {
+export default function AjouterRessource() {
   const { user } = useStateContext();
-  const [resources, setResources] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [ isavailable2, setIsavailable2] = useState(false);
 
-  const [requestData, setRequestData] = useState({
-    id_resource: '',
-    id_beneficiary: '',
-    request_date: '',
+  const [resourceData, setResourceData] = useState({
+    id_user_holder: null,
+    id_user_chief: user.matricule,
+    label: '',
+    discriminator: 'Accès',
+    description: '',
   });
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchEmployees = async () => {
       try {
-        const resourcesResponse = await axis.get('/resource');
         const employeeResponse = await axis.get('/employee');
-        setResources(resourcesResponse.data);
         setEmployees(employeeResponse.data.employees);
       } catch (err) {
         console.error(err);
       }
     };
-    fetchData();
+    fetchEmployees();
   }, []);
 
   const handleOpen = () => {
@@ -69,61 +71,46 @@ export default function AjouterRequete() {
   };
 
   const handleChange = (field) => (event) => {
-    setRequestData({ ...requestData, [field]: event.target.value });
+    const value = field === 'isavailable' ? event.target.checked : event.target.value;
+    setResourceData({ ...resourceData, [field]: value });
   };
 
   const handleSubmit = async () => {
     try {
-      const payload = {
-        ...requestData,
-        id_requester: user.matricule,
-      };
-
-      await axis.post('/request/new', payload);
-      alert('Requête créée avec succès');
+      await axis.post('/resource/new', resourceData);
+      alert('Ressource créée avec succès');
       handleClose();
     } catch (error) {
       console.error(error);
-      alert('Erreur lors de la création de la requête');
+      alert('Erreur lors de la création de la ressource');
     }
   };
 
   return (
     <div>
       <Button onClick={handleOpen} variant="contained" color="primary">
-        Créer une requête
+        Ajouter une Ressource
       </Button>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style(isSmallScreen, isVisible)}>
           <Typography variant="h5" sx={{ mb: 3, textAlign: 'center' }}>
-            Créer une Requête
+            Ajouter une Ressource
           </Typography>
           <Grid container spacing={2}>
+            {/* ID User Chief */}
             <Grid item xs={12} sm={6}>
-              <Typography>Solliciteur (id_requester):</Typography>
-              <TextField fullWidth value={user.matricule} disabled />
+              <Typography>Responsable (Chef):</Typography>
+              <TextField fullWidth value={`${user.matricule} - Moi`} disabled />
             </Grid>
+            {/* ID User Holder */}
             <Grid item xs={12} sm={6}>
-              <Typography>Ressource (id_resource):</Typography>
+              <Typography>Bénéficiaire:</Typography>
               <Select
                 fullWidth
-                value={requestData.id_resource}
-                onChange={handleChange('id_resource')}
+                value={resourceData.id_user_holder || ''}
+                onChange={handleChange('id_user_holder')}
               >
-                {resources.map((resource) => (
-                  <MenuItem key={resource.id_resource} value={resource.id_resource}>
-                    {resource.id_resource} - {resource.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography>Bénéficiaire (id_beneficiary):</Typography>
-              <Select
-                fullWidth
-                value={requestData.id_beneficiary}
-                onChange={handleChange('id_beneficiary')}
-              >
+                <MenuItem value="">Aucun</MenuItem>
                 {employees.map((employee) => (
                   <MenuItem key={employee.matricule} value={employee.matricule}>
                     {employee.matricule} - {employee.name} {employee.firstname}
@@ -131,16 +118,55 @@ export default function AjouterRequete() {
                 ))}
               </Select>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography>Date de la requête:</Typography>
+            {/* Label */}
+            <Grid item xs={12}>
+              <Typography>Libellé:</Typography>
               <TextField
                 fullWidth
-                type="date"
-                value={requestData.request_date}
-                onChange={handleChange('request_date')}
+                value={resourceData.label}
+                onChange={handleChange('label')}
+                placeholder="Nom de la ressource"
+              />
+            </Grid>
+            {/* Discriminator */}
+            <Grid item xs={12} sm={6}>
+              <Typography>Type :</Typography>
+              <Select
+                fullWidth
+                value={resourceData.discriminator}
+                onChange={handleChange('discriminator')}
+              >
+                <MenuItem value="Accès">Accès</MenuItem>
+                <MenuItem value="Equipement">Equipement</MenuItem>
+              </Select>
+            </Grid>
+            {/* Is Available */}
+            {/* <Grid item xs={12} sm={6}>
+            <Typography>Disponible :</Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={resourceData.isavailable}
+                    onChange={handleChange('isavailable')}
+                  />
+                }
+          
+              />
+            </Grid> */}
+            {/* Description */}
+            <Grid item xs={12}>
+              <Typography>Description:</Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                value={resourceData.description}
+                onChange={handleChange('description')}
+                placeholder="Description de la ressource"
               />
             </Grid>
           </Grid>
+          {/* Buttons */}
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
             <Button
               variant="contained"

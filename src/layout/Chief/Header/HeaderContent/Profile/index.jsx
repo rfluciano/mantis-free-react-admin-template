@@ -32,7 +32,8 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 
 // context
 import { useStateContext } from '../../../../../contexts/contextProvider'; // Adjust the path to your context
-import { handleLogout } from './Logout'; // Import logout function
+// import { handleLogout } from './Logout'; // Import logout function
+import { useNavigate } from 'react-router';
 
 // tab panel wrapper
 function TabPanel({ children, value, index, ...other }) {
@@ -55,8 +56,11 @@ function a11yProps(index) {
 export default function Profile() {
   const theme = useTheme();
 
-  const { user } = useStateContext(); // Extract user data from context
-  // const logout = () => handleLogout();
+  const navigate = useNavigate();
+  const { setUser,logout, setToken, user } = useStateContext(); // Context hooks used inside the component
+
+  
+  
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
   const handleToggle = () => {
@@ -139,10 +143,9 @@ export default function Profile() {
                       </Grid>
                       <Grid item>
                         <Tooltip title="Logout">
-                          <IconButton size="large" sx={{ color: 'text.primary' }} >
-                          {/* onClick={() => logout()}  */}
-                          <LogoutOutlined />
-                          </IconButton>
+                        <IconButton size="large" sx={{ color: 'text.primary' }} onClick={() => { console.log('Logout clicked'); logout(); }}>
+                            <LogoutOutlined />
+                        </IconButton>
                         </Tooltip>
                       </Grid>
                     </Grid>

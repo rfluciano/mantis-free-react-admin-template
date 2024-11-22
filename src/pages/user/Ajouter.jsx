@@ -1,143 +1,173 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
-import { Input, Select, MenuItem } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Modal,
+  Select,
+  MenuItem,
+  TextField,
+  Grid,
+} from '@mui/material';
 import axis from 'axis';
 import { useEffect, useState } from 'react';
-import { useStateContext } from 'contexts/contextProvider';
+import { useTheme, useMediaQuery } from '@mui/material';
 
-const style = {
+const style = (isSmallScreen, isVisible) => ({
   position: 'absolute',
   top: '50%',
   left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
+  transform: isVisible ? 'translate(-50%, -50%)' : 'translate(-50%, -100%)',
+  width: isSmallScreen ? '90%' : '60%',
   bgcolor: 'background.paper',
-  border: '0px solid #000',
   borderRadius: '10px',
   boxShadow: 24,
   p: 4,
-};
+  transition: 'transform 0.5s ease, opacity 0.5s ease',
+  opacity: isVisible ? 1 : 0,
+});
 
-export default function Ajouter() {
-  const [position, setPosition] = useState([]);
-  const [unity, setUnity] = useState([]);
-  const {messageError, messageSuccess} = useStateContext();
-  const [user, setUser] = useState({
-    email: "",
-    password: "",
-    discriminator: "unitychief",
+export default function AjouterUtilisateur() {
+  const [superiors, setSuperiors] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const [userData, setUserData] = useState({
+    username: '',
+    password: '',
+    discriminator: 'admin',
     id_superior: null,
-    matricule: "",
-    remember_me: false
+    matricule: '',
+    remember_me: false,
   });
 
-  const getPositions = async () => {
-    try {
-      const response = await axis.get("/position");
-      setPosition(response.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getUnity = async () => {
-    try {
-      const response = await axis.get("/unity"); // corrected endpoint if it should be unity
-      setUnity(response.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const { displayErrors} = useStateContext();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    getPositions();
-    getUnity();
+    const fetchSuperiors = async () => {
+      try {
+        const response = await axis.get('/user/superiors');
+        setSuperiors(response.data.superiors);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchSuperiors();
   }, []);
 
-  const handleChange = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
+  const handleOpen = () => {
+    setOpen(true);
+    setTimeout(() => setIsVisible(true), 10);
   };
 
-  const NewUser = async (e) => {
-    e.preventDefault();
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(() => setOpen(false), 500);
+  };
+
+  const handleChange = (field) => (event) => {
+    const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+    setUserData({ ...userData, [field]: value });
+  };
+
+  const handleSubmit = async () => {
     try {
-      const response = await axis.post("/register", user);
-      messageSuccess("User created successfully!");
-      console.log(response.data);
-    } catch (err) {
-      if (err.response && err.response.data && err.response.data) {
-        displayErrors(err.response.data);
-      } else {
-        console.log(err);
-      }
+      await axis.post('/user/new', userData);
+      alert('Utilisateur créé avec succès');
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      alert('Erreur lors de la création de l\'utilisateur');
     }
   };
 
   return (
     <div>
-      <button onClick={handleOpen}>Créer un utilisateur</button>
+      <Button onClick={handleOpen} variant="contained" color="primary">
+        Ajouter un Utilisateur
+      </Button>
       <Modal open={open} onClose={handleClose}>
-        <Box sx={style}>
-          <Typography variant="h5" component="h2">
-            Créer un utilisateur
+        <Box sx={style(isSmallScreen, isVisible)}>
+          <Typography variant="h5" sx={{ mb: 3, textAlign: 'center' }}>
+            Ajouter un Utilisateur
           </Typography>
-
-          <Typography sx={{ mt: 2 }}>Email:</Typography>
-          <Input
-            placeholder="Adresse email de l'utilisateur"
-            type='email'
-            name="email"
-            value={user.email}
-            onChange={handleChange}
-            fullWidth
-          />
-
-          <Typography sx={{ mt: 2 }}>Matricule:</Typography>
-          <Input
-            placeholder="Matricule de l'employé"
-            name="matricule"
-            value={user.matricule}
-            onChange={handleChange}
-            fullWidth
-          />
-
-          <Typography sx={{ mt: 2 }}>Privilège:</Typography>
-          <Select
-            name="discriminator"
-            value={user.discriminator}
-            onChange={handleChange}
-            fullWidth
-          >
-            <MenuItem value="unitychief">Chef d'unité</MenuItem>
-            <MenuItem value="admin">Administrateur</MenuItem>
-          </Select>
-
-          <Typography sx={{ mt: 2 }}>Mot de passe:</Typography>
-          <Input
-            placeholder="********"
-            type='password'
-            name="password"
-            value={user.password}
-            onChange={handleChange}
-            fullWidth
-          />
-
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3 }}
-            onClick={NewUser}
-          >
-            Créer un utilisateur
-          </Button>
+          <Grid container spacing={2}>
+            {/* Username */}
+            <Grid item xs={12}>
+              <Typography>Nom d'utilisateur:</Typography>
+              <TextField
+                fullWidth
+                value={userData.username}
+                onChange={handleChange('username')}
+                placeholder="Nom d'utilisateur"
+              />
+            </Grid>
+            {/* Password */}
+            <Grid item xs={12}>
+              <Typography>Mot de passe:</Typography>
+              <TextField
+                fullWidth
+                type="password"
+                value={userData.password}
+                onChange={handleChange('password')}
+                placeholder="Mot de passe"
+              />
+            </Grid>
+            {/* Discriminator */}
+            <Grid item xs={12} sm={6}>
+              <Typography>Rôle :</Typography>
+              <Select
+                fullWidth
+                value={userData.discriminator}
+                onChange={handleChange('discriminator')}
+              >
+                <MenuItem value="admin">Admin</MenuItem>
+                <MenuItem value="manager">Manager</MenuItem>
+                <MenuItem value="employee">Employé</MenuItem>
+              </Select>
+            </Grid>
+            {/* Matricule */}
+            <Grid item xs={12} sm={6}>
+              <Typography>Matricule :</Typography>
+              <TextField
+                fullWidth
+                value={userData.matricule}
+                onChange={handleChange('matricule')}
+                placeholder="Matricule de l'utilisateur"
+              />
+            </Grid>
+            {/* Id Superior */}
+            <Grid item xs={12} sm={6}>
+              <Typography>Supérieur Hiérarchique:</Typography>
+              <Select
+                fullWidth
+                value={userData.id_superior || ''}
+                onChange={handleChange('id_superior')}
+              >
+                <MenuItem value="">Aucun</MenuItem>
+                {superiors.map((superior) => (
+                  <MenuItem key={superior.matricule} value={superior.matricule}>
+                    {superior.matricule} - {superior.name} {superior.firstname}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Grid>
+          </Grid>
+          {/* Buttons */}
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleSubmit}
+              sx={{ mr: 2 }}
+            >
+              Sauvegarder
+            </Button>
+            <Button variant="outlined" color="error" onClick={handleClose}>
+              Annuler
+            </Button>
+          </Box>
         </Box>
       </Modal>
     </div>
