@@ -9,7 +9,6 @@ import {
 } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
-import Ajouter from './Ajouter';
 import PositionTable from './PositionTable';
 import PositionFilter from './PositionFilter'; // Position-specific filter
 
@@ -17,6 +16,7 @@ import PositionFilter from './PositionFilter'; // Position-specific filter
 import SearchInput from './SearchInput';
 import ExportPopover from './ExportPopover';
 import ImportPopover from './ImportPopover';
+import Ajouterposition from './Ajouter';
 
 export default function PositionList() {
   const theme = useTheme(); // Access the theme
@@ -68,7 +68,7 @@ export default function PositionList() {
           />
 
           {/* Ajouter Button */}
-          <Ajouter />
+          <Ajouterposition />
 
           {/* Filter Button */}
           <IconButton aria-label="Filtrer" onClick={handleFilterOpen}>

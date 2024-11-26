@@ -97,8 +97,15 @@ ResourceTableHead.propTypes = {
 };
 
 function AvailabilityIndicator({ isavailable }) {
-  const color = isavailable ? 'success' : 'warning';
-  const title = isavailable ? 'Disponible' : 'Non disponible';
+  // Map the availability status to color and title
+  const statusMap = {
+    Libre: { color: 'success', title: 'Disponible' },
+    Pend: { color: 'warning', title: 'En attente' },
+    Pris: { color: 'error', title: 'Non disponible' },
+  };
+
+  const { color, title } = statusMap[isavailable] || { color: 'default', title: 'Statut inconnu' };
+
   return (
     <Stack direction="row" spacing={1} alignItems="center">
       <Dot color={color} />

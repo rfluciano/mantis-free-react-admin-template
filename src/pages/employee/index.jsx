@@ -1,52 +1,73 @@
-import React, { useState } from 'react';
-import { 
-  Grid, 
-  Typography, 
-  useMediaQuery, 
-  useTheme, 
-  IconButton, 
-  Box 
+import React, { useEffect, useState } from 'react';
+import {
+  Grid,
+  Typography,
+  useMediaQuery,
+  useTheme,
+  IconButton,
+  Box,
+  CircularProgress,
 } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
 import Ajouter from './Ajouter';
-import EmployeeTable from './EmployeeTable';
-import EmployeeFilter from './EmployeeFilter'; // Employee-specific filter
-
-// Modularized Components
 import SearchInput from './SearchInput';
 import ExportPopover from './ExportPopover';
 import ImportPopover from './ImportPopover';
+import axis from 'axis';
+import { useStateContext } from 'contexts/contextProvider';
+import EmployeeTable from './EmployeeTable';
+import EmployeeFilter from './EmployeeFilter';
 
-export default function EmployeeList() {
-  const theme = useTheme(); // Access the theme
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // Use theme for breakpoint
+export default function Receive() {
+  const theme = useTheme();
+  const { user } = useStateContext();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filters, setFilters] = useState({}); // This will store the applied filters
+  const [employee, setEmployee] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Search handler
-  const handleSearchChange = (event) => setSearchTerm(event.target.value);
-
-  // Apply filter and close modal
-  const handleFilterApply = (appliedFilters) => {
-    setFilters(appliedFilters); // Set the applied filters
-    setIsFilterOpen(false); // Close the filter modal
+  // Fetch received employees based on the search term
+  const fetchEmployees = async (query) => {
+    setIsLoading(true);
+    try {
+      let response;
+      if (query.trim() === '') {
+        // Fetch all received employees when the search term is empty
+        response = await axis.get(`/employee`)
+      } else {
+        // Fetch filtered employees based on search query
+        response = await axis.get('/search/employee',{query});
+      }
+      setEmployee(response.data);
+    } catch (error) {
+      console.error('Failed to fetch employees:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Open filter modal
-  const handleFilterOpen = () => setIsFilterOpen(true);
+  // Handle changes in search input
+  const handleSearchChange = (event) => {
+    const newSearchTerm = event.target.value;
+    setSearchTerm(newSearchTerm);
+    fetchEmployees(newSearchTerm);
+  };
+
+  // Fetch data initially when the component is mounted
+  useEffect(() => {
+    fetchEmployees('');
+  }, []); // Empty dependency array to only run once
 
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      {/* Header */}
       <Grid item xs={12}>
-        <Typography variant="h5" sx={{ mb: 0 }}>
+        <Typography variant="h5" sx={{ mb: -1.5 }}>
           Liste des employés
         </Typography>
       </Grid>
 
-      {/* Table Options */}
       <Grid item xs={12}>
         <Box
           display="flex"
@@ -61,29 +82,24 @@ export default function EmployeeList() {
           }}
         >
           {/* Search Input */}
-          <SearchInput 
-            searchTerm={searchTerm} 
-            onSearchChange={handleSearchChange} 
-            isSmallScreen={isSmallScreen} 
+          <SearchInput
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            isSmallScreen={isSmallScreen}
           />
-
           {/* Ajouter Button */}
           <Ajouter />
-
           {/* Filter Button */}
-          <IconButton aria-label="Filtrer" onClick={handleFilterOpen}>
+          <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>
             <FilterList />
           </IconButton>
-
-          {/* Export Button */}
+          {/* Export Popover */}
           <ExportPopover />
-
-          {/* Import Button */}
+          {/* Import Popover */}
           <ImportPopover />
         </Box>
       </Grid>
 
-      {/* Employee Table */}
       <Grid item xs={12}>
         <MainCard
           sx={{
@@ -94,19 +110,23 @@ export default function EmployeeList() {
             },
           }}
         >
-          <EmployeeTable 
-            searchTerm={searchTerm} 
-            filters={filters} // Pass filters to the table
-          />
+          {isLoading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
+              <CircularProgress />
+            </Box>
+          ) : employee.length === 0 ? (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
+              <Typography variant="body1">Aucune donnée trouvée.</Typography>
+            </Box>
+          ) : (
+            // Display Received Request Table
+            <EmployeeTable employees={employee} />
+          )}
         </MainCard>
       </Grid>
 
-      {/* Employee Filter Modal */}
-      <EmployeeFilter 
-        open={isFilterOpen} 
-        onClose={() => setIsFilterOpen(false)} 
-        onApply={handleFilterApply} // Pass callback to apply the filter
-      />
+      {/* Request Filter Modal */}
+      <EmployeeFilter open={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </Grid>
   );
 }

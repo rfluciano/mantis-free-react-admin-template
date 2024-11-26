@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { handleLogout } from './Logout'; 
 import { useStateContext } from 'contexts/contextProvider';
 
 // Material-UI components
@@ -18,20 +17,23 @@ import UserOutlined from '@ant-design/icons/UserOutlined';
 import WalletOutlined from '@ant-design/icons/WalletOutlined';
 import { UnorderedListOutlined } from '@ant-design/icons';
 
-export default function ProfileTab() {
+export default function ProfileTab({ handleClose }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const navigate = useNavigate();
-  const { user } = useStateContext(); // Retrieve user context
+  const { user, logout } = useStateContext(); // Retrieve user context
 
   // Determine basePath for navigation based on user role
   const basePath = user?.discriminator === 'unitychief' ? '' : '/admin';
 
-  const logout = () => handleLogout();
+ // Retrieve context
 
   const handleListItemClick = (event, index, path) => {
     setSelectedIndex(index);
     if (path) {
       navigate(path);
+    }
+    if (handleClose) {
+      handleClose(event); // Close the Popper
     }
   };
 
@@ -46,7 +48,7 @@ export default function ProfileTab() {
         </ListItemIcon>
         <ListItemText primary="Modifier profil" />
       </ListItemButton>
-      
+
       <ListItemButton
         selected={selectedIndex === 1}
         onClick={(event) => handleListItemClick(event, 1, `${basePath}/profile`)}
@@ -57,8 +59,8 @@ export default function ProfileTab() {
         <ListItemText primary="Voir profil" />
       </ListItemButton>
 
-      <ListItemButton 
-        selected={selectedIndex === 2} 
+      <ListItemButton
+        selected={selectedIndex === 2}
         onClick={(event) => handleListItemClick(event, 2, `${basePath}/history`)}
       >
         <ListItemIcon>
@@ -69,7 +71,10 @@ export default function ProfileTab() {
 
       <ListItemButton
         selected={selectedIndex === 3}
-        onClick={logout} 
+        onClick={(event) => {
+          logout();
+          handleClose(event); // Close the Popper after logging out
+        }}
       >
         <ListItemIcon>
           <LogoutOutlined />
@@ -81,5 +86,5 @@ export default function ProfileTab() {
 }
 
 ProfileTab.propTypes = {
-  handleLogout: PropTypes.func,
+  handleClose: PropTypes.func.isRequired,
 };

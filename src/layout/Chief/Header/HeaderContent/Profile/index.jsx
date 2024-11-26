@@ -67,6 +67,11 @@ export default function Profile() {
     setOpen((prevOpen) => !prevOpen);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  }
+
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
       return;
@@ -143,7 +148,7 @@ export default function Profile() {
                       </Grid>
                       <Grid item>
                         <Tooltip title="Logout">
-                        <IconButton size="large" sx={{ color: 'text.primary' }} onClick={() => { console.log('Logout clicked'); logout(); }}>
+                        <IconButton size="large" sx={{ color: 'text.primary' }} onClick={() => { console.log('Logout clicked'); handleLogout(); }}>
                             <LogoutOutlined />
                         </IconButton>
                         </Tooltip>
@@ -168,8 +173,9 @@ export default function Profile() {
                      </Tabs>
                   </Box>
                   <TabPanel value={value} index={0} dir={theme.direction}>
-                    <ProfileTab />
+                    <ProfileTab handleClose={handleClose} />
                   </TabPanel>
+
                 </MainCard>
               </ClickAwayListener>
             </Paper>

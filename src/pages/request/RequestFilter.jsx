@@ -1,7 +1,18 @@
-import React from 'react';
-import { Modal, Box, Typography, Button } from '@mui/material';
+import React, { useState } from 'react';
+import { Modal, Box, Typography, Button, TextField, MenuItem } from '@mui/material';
 
-export default function RequestFilter({ open, onClose }) {
+const statuses = ['En attente', 'Approuvé', 'Rejeté'];
+
+export default function RequestFilter({ open, onClose, onApplyFilters }) {
+  const [status, setStatus] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const handleApply = () => {
+    onApplyFilters({ status, startDate, endDate });
+    onClose();
+  };
+
   return (
     <Modal
       open={open}
@@ -14,39 +25,56 @@ export default function RequestFilter({ open, onClose }) {
         alignItems: 'flex-start',
         justifyContent: 'flex-end',
         padding: '10px',
-        zIndex: 1300, // Ensure it appears above other elements
+        zIndex: 1300,
       }}
     >
       <Box
         sx={{
           width: '300px',
-          height: '500px',
+          height: 'auto',
           bgcolor: 'background.paper',
           borderRadius: '8px',
           boxShadow: 24,
           p: 3,
           position: 'relative',
-          animation: 'slideIn 0.4s ease-out',
-          '@keyframes slideIn': {
-            '0%': {
-              transform: 'translateY(-50%) translateX(100%)',
-              opacity: 0,
-            },
-            '100%': {
-              transform: 'translateY(0) translateX(0)',
-              opacity: 1,
-            },
-          },
         }}
       >
         <Typography id="user-filter-title" variant="h6" component="h2" sx={{ mb: 2 }}>
           Filtres
         </Typography>
-        {/* Add your filter options here */}
-        <Typography id="user-filter-description" variant="body2" sx={{ mb: 3 }}>
-          Placeholder for filter options.
-        </Typography>
-        <Button variant="contained" color="primary" fullWidth onClick={onClose}>
+        <TextField
+          label="Statut"
+          select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+        >
+          {statuses.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Date de début"
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Date de fin"
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ shrink: true }}
+        />
+        <Button variant="contained" color="primary" fullWidth onClick={handleApply}>
           Appliquer
         </Button>
       </Box>

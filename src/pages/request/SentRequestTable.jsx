@@ -22,10 +22,9 @@ const headCells = [
   { id: 'id_request', align: 'left', label: 'ID Requête' },
   { id: 'resource.label', align: 'left', label: 'Ressource concerné' },
   { id: 'receiver.matricule', align: 'left', label: 'Destinataire' },
+  { id: 'beneficiary.matricule', align: 'left', label: 'Bénéficiare' },
   { id: 'validation.status', align: 'left', label: 'Statut' },
-  { id: 'validation.rejection_reason', align: 'left', label: 'Motif de rejet' },
   { id: 'validation.validation_date', align: 'left', label: 'Date de validation' },
-  { id: 'validation.delivery_date', align: 'left', label: 'Date de livraison' },
   { id: 'action', align: 'center', label: 'Action' },
 ];
 
@@ -98,7 +97,7 @@ function StatusIndicator({ status }) {
       color = 'success';
       title = 'Approvée';
       break;
-    case 'pending':
+    case 'en attente':
       color = 'warning';
       title = 'En attente';
       break;
@@ -107,7 +106,7 @@ function StatusIndicator({ status }) {
       title = 'Rejetée';
       break;
     default:
-      color = 'primary';
+      color = 'red';
       title = 'Erreur';
   }
 
@@ -119,7 +118,28 @@ function StatusIndicator({ status }) {
   );
 }
 
-export default function SentRequestTable({ requests }) {
+const StyledValueBox = ({ children }) => (
+  <Box
+    sx={{
+      display: 'inline-block',
+      backgroundColor: 'rgba(173, 216, 230, 0.3)', // Light blue, nearly transparent
+      borderRadius: '5px',
+      padding: '4px 8px',
+      fontWeight: 500,
+    }}
+  >
+    {children}
+  </Box>
+);
+
+export default function AllRequestTable({ requests }) {
+  // Utility function to format values
+const formatValue = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return <StyledValueBox>--//--</StyledValueBox>;
+  }
+  return value;
+};
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id_request');
   const [page, setPage] = useState(1);
@@ -145,27 +165,31 @@ export default function SentRequestTable({ requests }) {
         <Table>
           <RequestTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>
-            {paginatedRequests.map((request) => (
-              <TableRow key={request.id_request}>
-                <TableCell>
-                  <Link color="secondary">{request.id_request}</Link>
-                </TableCell>
-                <TableCell>{request.resource?.label || ''}</TableCell>
-                <TableCell>
-                  {request.receiver?.matricule || ''}
-                </TableCell>
-                <TableCell>
-                  <StatusIndicator status={request.validation?.status || 'pending'} />
-                </TableCell>
-                <TableCell>{request.validation?.rejection_reason || ''}</TableCell>
-                <TableCell>{request.validation?.validation_date || ''}</TableCell>
-                <TableCell>{request.validation?.delivery_date || ''}</TableCell>
-                <TableCell>
-                  <SentMenu />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+  {paginatedRequests.map((request) => (
+    <TableRow key={request.id_request}>
+      <TableCell>
+        {formatValue(
+          <Link color="secondary">{request.id_request}</Link>
+        )}
+      </TableCell>
+      <TableCell>{formatValue(request.resource?.label)}</TableCell>
+      <TableCell>{formatValue(request.receiver?.matricule)}</TableCell>
+      <TableCell>{formatValue(request.beneficiary?.matricule)}</TableCell>
+      <TableCell>
+        {formatValue(
+          <StatusIndicator status={request.validation?.status || "pending"}  />
+        )}
+      </TableCell>
+      {/* <TableCell>{formatValue(request.validation?.rejection_reason)}</TableCell> */}
+      <TableCell>{formatValue(request.validation?.validation_date)}</TableCell>
+      <TableCell align="center">
+        {formatValue(<SentMenu />)}
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+
+
         </Table>
       </TableContainer>
 
@@ -181,10 +205,9 @@ export default function SentRequestTable({ requests }) {
   );
 }
 
-SentRequestTable.propTypes = {
+AllRequestTable.propTypes = {
   requests: PropTypes.array.isRequired,
 };
-
 
 RequestTableHead.propTypes = {
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,

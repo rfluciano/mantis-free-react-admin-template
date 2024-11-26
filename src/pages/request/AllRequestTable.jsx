@@ -98,7 +98,7 @@ function StatusIndicator({ status }) {
       color = 'success';
       title = 'Approvée';
       break;
-    case 'pending':
+    case 'en attente':
       color = 'warning';
       title = 'En attente';
       break;
@@ -107,7 +107,7 @@ function StatusIndicator({ status }) {
       title = 'Rejetée';
       break;
     default:
-      color = 'primary';
+      color = 'red';
       title = 'Erreur';
   }
 

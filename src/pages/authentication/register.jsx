@@ -8,10 +8,12 @@ import Typography from '@mui/material/Typography';
 // project import
 import AuthWrapper from './AuthWrapper';
 import AuthRegister from './auth-forms/AuthRegister';
+import { useTheme } from '@emotion/react';
 
 // ================================|| REGISTER ||================================ //
 
 export default function Register() {
+  // const themee = useTheme();
   return (
     <AuthWrapper>
       <Grid container spacing={3}>

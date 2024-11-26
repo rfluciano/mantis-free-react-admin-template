@@ -28,15 +28,17 @@ const style = (isSmallScreen, isVisible) => ({
   opacity: isVisible ? 1 : 0,
 });
 
-export default function Ajouterposition() {
-  const { user, messageSuccess, messageError } = useStateContext();
-  const [unity, setUnity] = useState([]);
+export default function Modify() {
+  const { user } = useStateContext();
+  const [resources, setResources] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
-  const [positionData, setPositionData] = useState({
-    id_unity: null,
-    title: '',
+  const [requestData, setRequestData] = useState({
+    id_resource: '',
+    id_beneficiary: '',
+    request_date: '',
   });
 
   const theme = useTheme();
@@ -45,8 +47,10 @@ export default function Ajouterposition() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const unityResponse = await axis.get('/unity');
-        setUnity(unityResponse.data);
+        const resourcesResponse = await axis.get('/resource/mandeha');
+        const employeeResponse = await axis.get('/employee');
+        setResources(resourcesResponse.data);
+        setEmployees(employeeResponse.data.employees);
       } catch (err) {
         console.error(err);
       }
@@ -65,69 +69,76 @@ export default function Ajouterposition() {
   };
 
   const handleChange = (field) => (event) => {
-    setPositionData({ ...positionData, [field]: event.target.value });
+    setRequestData({ ...requestData, [field]: event.target.value });
   };
 
   const handleSubmit = async () => {
     try {
-      // Send the positionData in the POST request
-      const response = await axis.post('/position/new', positionData);
-      
-      if (response.status === 201) {
-        messageSuccess('Poste créée avec succès');
-        handleClose();
-      } else {
-        messageError("Erreur inattendue lors de la création du poste");
-        console.error('Unexpected response:', response);
-      }
+      const payload = {
+        ...requestData,
+        id_requester: user.matricule,
+      };
+
+      await axis.post('/request/new', payload);
+      alert('Requête créée avec succès');
+      handleClose();
     } catch (error) {
-      console.error('Error during unit creation:', error);
-  
-      // Provide better feedback on errors
-      if (error.response && error.response.data) {
-        messageError(
-          error.response.data.message ||
-            "Erreur lors de la création du poste"
-        );
-      } else {
-        messageError("Erreur réseau ou problème inattendu");
-      }
+      console.error(error);
+      alert('Erreur lors de la création de la requête');
     }
   };
-  
 
   return (
     <div>
       <Button onClick={handleOpen} variant="contained" color="primary">
-        Ajouter un poste
+        Créer une requête
       </Button>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style(isSmallScreen, isVisible)}>
           <Typography variant="h5" sx={{ mb: 3, textAlign: 'center' }}>
-            Créer une unité
+            Créer une Requête
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <Typography>Titre du poste:</Typography>
-              <TextField
-               fullWidth
-               value={positionData.title}
-               onChange={handleChange('title')} />
+              <Typography>Solliciteur (id_requester):</Typography>
+              <TextField fullWidth value={user.matricule} disabled />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Typography>Unité Parent:</Typography>
+              <Typography>Ressource (id_resource):</Typography>
               <Select
                 fullWidth
-                value={positionData.id_unity}
-                onChange={handleChange('id_unity')}
+                value={requestData.id_resource}
+                onChange={handleChange('id_resource')}
               >
-                <MenuItem value={null}>Aucune</MenuItem>
-                {unity.map((unity) => (
-                  <MenuItem key={unity.id_unity} value={unity.id_unity}>
-                    {unity.id_unity} - {unity.type} {unity.title}
+                {resources.map((resource) => (
+                  <MenuItem key={resource.id_resource} value={resource.id_resource}>
+                    {resource.id_resource} - {resource.label}
                   </MenuItem>
                 ))}
               </Select>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography>Bénéficiaire (id_beneficiary):</Typography>
+              <Select
+                fullWidth
+                value={requestData.id_beneficiary}
+                onChange={handleChange('id_beneficiary')}
+              >
+                {employees.map((employee) => (
+                  <MenuItem key={employee.matricule} value={employee.matricule}>
+                    {employee.matricule} - {employee.name} {employee.firstname}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography>Date de la requête:</Typography>
+              <TextField
+                fullWidth
+                type="date"
+                value={requestData.request_date}
+                onChange={handleChange('request_date')}
+              />
             </Grid>
           </Grid>
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>

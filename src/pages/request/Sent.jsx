@@ -10,14 +10,14 @@ import {
 } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
-import Ajouter from './Ajouter';
+import AjouterRequete from './Ajouter';
 import RequestFilter from './RequestFilter';
 import SearchInput from './SearchInput';
 import ExportPopover from './ExportPopover';
 import ImportPopover from './ImportPopover';
 import axis from 'axis';
 import { useStateContext } from 'contexts/contextProvider';
-import SentRequestTable from './SentRequestTable';
+import ReceivedRequestTable from './ReceivedRequestTable';
 
 export default function Request() {
   const { user } = useStateContext();
@@ -34,7 +34,7 @@ export default function Request() {
       let response;
       if (query.trim() === '' || query.trim() === null) {
         // Execute the default request when search query is empty
-        response = await axis.get(`/request/sent/${user.id_user}`);
+        response = await axis.get(`/request/sent/${user.matricule}`);
       } else {
         // Execute the search-specific request when a query exists
         response = await axis.get('/request/search', { params: { query } });
@@ -62,7 +62,7 @@ export default function Request() {
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       <Grid item xs={12}>
         <Typography variant="h5" sx={{ mb: -1.5 }}>
-          Liste des requêtes
+          Liste des requêtes envoyées
         </Typography>
       </Grid>
 
@@ -84,7 +84,7 @@ export default function Request() {
             onSearchChange={handleSearchChange} 
             isSmallScreen={isSmallScreen} 
           />
-          <Ajouter />
+          <AjouterRequete />
           <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>
             <FilterList />
           </IconButton>
@@ -112,7 +112,7 @@ export default function Request() {
               <Typography variant="body1">Aucune donnée trouvée.</Typography>
             </Box>
           ) : (
-            <SentRequestTable requests={filteredRequests} />
+            <ReceivedRequestTable requests={filteredRequests} />
           )}
         </MainCard>
       </Grid>

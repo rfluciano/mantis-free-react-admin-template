@@ -28,7 +28,8 @@ const style = (isSmallScreen, isVisible) => ({
 });
 
 export default function AjouterUtilisateur() {
-  const [superiors, setSuperiors] = useState([]);
+  // const [superiors, setSuperiors] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -36,7 +37,7 @@ export default function AjouterUtilisateur() {
     username: '',
     password: '',
     discriminator: 'admin',
-    id_superior: null,
+    // id_superior: null,
     matricule: '',
     remember_me: false,
   });
@@ -45,15 +46,17 @@ export default function AjouterUtilisateur() {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    const fetchSuperiors = async () => {
+    const Fetchdata = async () => {
       try {
-        const response = await axis.get('/user/superiors');
-        setSuperiors(response.data.superiors);
+        const employee = await axis.get("/employee");
+        setEmployees(employee.data.employees)
+        // const response = await axis.get('/user/superiors');
+        // setSuperiors(response.data.superiors);
       } catch (err) {
         console.error(err);
       }
     };
-    fetchSuperiors();
+    Fetchdata();
   }, []);
 
   const handleOpen = () => {
@@ -73,8 +76,8 @@ export default function AjouterUtilisateur() {
 
   const handleSubmit = async () => {
     try {
-      await axis.post('/user/new', userData);
-      alert('Utilisateur créé avec succès');
+      await axis.post('/register', userData);
+      messageSuccess('Utilisateur créé avec succès');
       handleClose();
     } catch (error) {
       console.error(error);
@@ -114,6 +117,16 @@ export default function AjouterUtilisateur() {
                 placeholder="Mot de passe"
               />
             </Grid>
+            <Grid item xs={12}>
+              <Typography>Confirmer mot de passe:</Typography>
+              <TextField
+                fullWidth
+                type="password"
+                value={userData.password}
+                onChange={handleChange('password')}
+                placeholder="Confirmer le mot de passe"
+              />
+            </Grid>
             {/* Discriminator */}
             <Grid item xs={12} sm={6}>
               <Typography>Rôle :</Typography>
@@ -122,23 +135,27 @@ export default function AjouterUtilisateur() {
                 value={userData.discriminator}
                 onChange={handleChange('discriminator')}
               >
-                <MenuItem value="admin">Admin</MenuItem>
-                <MenuItem value="manager">Manager</MenuItem>
-                <MenuItem value="employee">Employé</MenuItem>
+                <MenuItem value="admin">Administrateur</MenuItem>
+                <MenuItem value="unitychief">Chef d'unité</MenuItem>
               </Select>
             </Grid>
             {/* Matricule */}
             <Grid item xs={12} sm={6}>
-              <Typography>Matricule :</Typography>
-              <TextField
+              <Typography>Matricule de l'employé:</Typography>
+              <Select
                 fullWidth
-                value={userData.matricule}
+                value={userData.matricule || ''}
                 onChange={handleChange('matricule')}
-                placeholder="Matricule de l'utilisateur"
-              />
+              >
+                {employees.map((employee) => (
+                  <MenuItem key={employee.matricule} value={employee.matricule}>
+                    {employee.matricule} - {employee.name} {employee.firstname}
+                  </MenuItem>
+                ))}
+              </Select>
             </Grid>
             {/* Id Superior */}
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <Typography>Supérieur Hiérarchique:</Typography>
               <Select
                 fullWidth
@@ -152,7 +169,7 @@ export default function AjouterUtilisateur() {
                   </MenuItem>
                 ))}
               </Select>
-            </Grid>
+            </Grid> */}
           </Grid>
           {/* Buttons */}
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>

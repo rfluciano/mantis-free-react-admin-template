@@ -13,7 +13,7 @@ import Box from '@mui/material/Box';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
-import Pagination from '@mui/material/Pagination';
+import Pagination from '@mui/material/Pagination'; // Here is the pagination component
 import LongMenu from './MyResourceMenu';
 import { useStateContext } from 'contexts/contextProvider';
 import Dot from 'components/@extended/Dot';
@@ -47,12 +47,11 @@ const headCells = [
   { id: 'label', align: 'left', label: 'Libellé' },
   { id: 'discriminator', align: 'left', label: 'Type' },
   { id: 'description', align: 'left', label: 'Description' },
-  { id: 'isavailable', align: 'left', label: 'Disponibilité' },
-  { id: 'id_user_holder', align: 'left', label: 'Propriétaire' },
+  { id: 'id_user_chief', align: 'left', label: 'Responsable' },
   { id: 'action', align: 'left', label: '' },
 ];
 
-function MyResourceTableHead({ order, orderBy, onRequestSort, onSelectAllClick, numSelected, rowCount }) {
+function ResourceTableHead({ order, orderBy, onRequestSort, onSelectAllClick, numSelected, rowCount }) {
   const createSortHandler = (property) => (event) => onRequestSort(event, property);
 
   return (
@@ -86,7 +85,7 @@ function MyResourceTableHead({ order, orderBy, onRequestSort, onSelectAllClick, 
   );
 }
 
-MyResourceTableHead.propTypes = {
+ResourceTableHead.propTypes = {
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
   orderBy: PropTypes.string.isRequired,
   onRequestSort: PropTypes.func.isRequired,
@@ -113,28 +112,29 @@ function AvailabilityIndicator({ isavailable }) {
   );
 }
 
+
 AvailabilityIndicator.propTypes = {
   isavailable: PropTypes.bool.isRequired,
 };
 
-export default function MyResourceTable() {
-  const { user, messageSuccess, messageError, messageDanger } = useStateContext();
+export default function ResourceTable() {
+  const { user, messageSuccess, messageError } = useStateContext();
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id_resource');
   const [resources, setResources] = useState([]);
   const [selected, setSelected] = useState([]);
-  const [page, setPage] = useState(1); // Current page
-  const rowsPerPage = 9; 
+  const [page, setPage] = useState(1); // Use 1-based page
+  const rowsPerPage = 9; // You can set rows per page as needed
 
   useEffect(() => {
-    axis.get(`/resource/chief/${user.id_user}`)
+    axis.get(`/resource/mandeha`)
       .then((response) => {
         setResources(response.data);
       })
       .catch((error) => {
         console.error('Failed to fetch resources:', error);
       });
-  }, [user.id_user]);
+  }, []);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -150,8 +150,6 @@ export default function MyResourceTable() {
     }
     setSelected([]);
   };
-
-  const handlePageChange = (event, newPage) => setPage(newPage);
 
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
@@ -173,11 +171,15 @@ export default function MyResourceTable() {
     setSelected(newSelected);
   };
 
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const sortedAndPaginatedResources = useMemo(() => {
     const sortedData = [...resources].sort(getComparator(order, orderBy));
-    return sortedData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+    return sortedData.slice((page - 1) * rowsPerPage, page * rowsPerPage); // Adjust for 1-based page
   }, [order, orderBy, page, resources]);
 
   return (
@@ -200,7 +202,7 @@ export default function MyResourceTable() {
         }}
       >
         <Table aria-labelledby="tableTitle">
-          <MyResourceTableHead
+          <ResourceTableHead
             order={order}
             orderBy={orderBy}
             onRequestSort={handleRequestSort}
@@ -229,10 +231,11 @@ export default function MyResourceTable() {
                   </TableCell>
                   <TableCell>{resource.id_resource}</TableCell>
                   <TableCell>{resource.label}</TableCell>
-                  <TableCell>{resource.discriminator === 'access' ? 'Accès' : 'Equipement'}</TableCell>
+                  <TableCell>{resource.discriminator === 'Accès' ? 'Accès' : 'Equipement'}</TableCell>
                   <TableCell>{resource.description}</TableCell>
-                  <TableCell><AvailabilityIndicator isavailable={resource.isavailable} /></TableCell>
-                  <TableCell>{resource.id_user_holder}</TableCell>
+                  {/* <TableCell><AvailabilityIndicator isavailable={resource.isavailable} /></TableCell> */}
+                  <TableCell>{resource.id_user_chief}</TableCell>
+                  {/* <TableCell>{resource.id_user_holder}</TableCell> */}
                   <TableCell><LongMenu employeeId={resource.id_resource} /></TableCell>
                 </TableRow>
               );

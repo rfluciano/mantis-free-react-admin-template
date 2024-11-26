@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
 import MainCard from 'components/MainCard';
 import Ajouter from './AjouterRessource';
-import ResourceTable from './ResourceTable';
+import AvailableResourceTable from './AvailableResourceTable';
 
 export default function AvailableResource() {
   const theme = useTheme(); // Access the theme
@@ -13,7 +13,7 @@ export default function AvailableResource() {
       <Grid item xs={12}>
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid item>
-            <Typography variant="h5">Liste des ressources disponibles</Typography>
+            <Typography variant="h5">Liste des ressources disponibles :</Typography>
           </Grid>
           <Grid item>
             <Ajouter />
@@ -31,7 +31,7 @@ export default function AvailableResource() {
             },
           }}
         >
-          <ResourceTable />
+          <AvailableResourceTable />
         </MainCard>
       </Grid>
     </Grid>

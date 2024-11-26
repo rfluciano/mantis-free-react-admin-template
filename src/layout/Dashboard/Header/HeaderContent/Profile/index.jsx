@@ -168,7 +168,7 @@ export default function Profile() {
                      </Tabs>
                   </Box>
                   <TabPanel value={value} index={0} dir={theme.direction}>
-                    <ProfileTab />
+                    <ProfileTab handleClose={handleClose} />
                   </TabPanel>
                 </MainCard>
               </ClickAwayListener>

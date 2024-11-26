@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Box, Typography, Button } from '@mui/material';
 
-export default function RequestFilter({ open, onClose }) {
+export default function MyTeamFilter({ open, onClose }) {
   return (
     <Modal
       open={open}

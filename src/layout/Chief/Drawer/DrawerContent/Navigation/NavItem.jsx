@@ -38,7 +38,10 @@ export default function NavItem({ item, level }) {
 
   const { pathname } = useLocation();
   const isChildActive = item.children && item.children.some(child => child.url && matchPath({ path: child.url, end: false }, pathname));
-  const isSelected = (item.url && matchPath({ path: item.url, end: true }, pathname)) || (!isChildActive && openItem === item.id);
+  const isSelected = Boolean(
+    (item.url && matchPath({ path: item.url, end: true }, pathname)) || 
+    (!isChildActive && openItem === item.id)
+  );
 
   // active menu item on page load
   useEffect(() => {

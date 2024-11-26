@@ -47,7 +47,7 @@ export default function AjouterRequete() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resourcesResponse = await axis.get('/resource');
+        const resourcesResponse = await axis.get('/resource/mandeha');
         const employeeResponse = await axis.get('/employee');
         setResources(resourcesResponse.data);
         setEmployees(employeeResponse.data.employees);

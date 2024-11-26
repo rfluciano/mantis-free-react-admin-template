@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { handleLogout } from './Logout'; 
-
+import { useStateContext } from 'contexts/contextProvider';
 
 // Material-UI components
 import List from '@mui/material/List';
@@ -18,17 +17,23 @@ import UserOutlined from '@ant-design/icons/UserOutlined';
 import WalletOutlined from '@ant-design/icons/WalletOutlined';
 import { UnorderedListOutlined } from '@ant-design/icons';
 
-export default function ProfileTab() {
+export default function ProfileTab({ handleClose }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const navigate = useNavigate();
+  const { user, logout } = useStateContext(); // Retrieve user context
 
-  const logout = handleLogout();
+  // Determine basePath for navigation based on user role
+  const basePath = user?.discriminator === 'unitychief' ? '' : '/admin';
+
+ // Retrieve context
 
   const handleListItemClick = (event, index, path) => {
     setSelectedIndex(index);
-
     if (path) {
       navigate(path);
+    }
+    if (handleClose) {
+      handleClose(event); // Close the Popper
     }
   };
 
@@ -36,17 +41,17 @@ export default function ProfileTab() {
     <List component="nav" sx={{ p: 0, '& .MuiListItemIcon-root': { minWidth: 32 } }}>
       <ListItemButton
         selected={selectedIndex === 0}
-        onClick={(event) => handleListItemClick(event, 0, '/profile')}
+        onClick={(event) => handleListItemClick(event, 0, `${basePath}/profile/edit`)}
       >
         <ListItemIcon>
           <EditOutlined />
         </ListItemIcon>
         <ListItemText primary="Modifier profil" />
       </ListItemButton>
-      
+
       <ListItemButton
         selected={selectedIndex === 1}
-        onClick={(event) => handleListItemClick(event, 1, '/profile')}
+        onClick={(event) => handleListItemClick(event, 1, `${basePath}/profile`)}
       >
         <ListItemIcon>
           <UserOutlined />
@@ -54,9 +59,9 @@ export default function ProfileTab() {
         <ListItemText primary="Voir profil" />
       </ListItemButton>
 
-      <ListItemButton 
-        selected={selectedIndex === 2} 
-        onClick={(event) => handleListItemClick(event, 1, '/history')} 
+      <ListItemButton
+        selected={selectedIndex === 2}
+        onClick={(event) => handleListItemClick(event, 2, `${basePath}/history`)}
       >
         <ListItemIcon>
           <UnorderedListOutlined />
@@ -66,7 +71,10 @@ export default function ProfileTab() {
 
       <ListItemButton
         selected={selectedIndex === 3}
-        onClick={logout} 
+        onClick={(event) => {
+          logout();
+          handleClose(event); // Close the Popper after logging out
+        }}
       >
         <ListItemIcon>
           <LogoutOutlined />
@@ -78,5 +86,5 @@ export default function ProfileTab() {
 }
 
 ProfileTab.propTypes = {
-  handleLogout: PropTypes.func,
+  handleClose: PropTypes.func.isRequired,
 };
