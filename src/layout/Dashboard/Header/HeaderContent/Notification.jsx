@@ -121,6 +121,29 @@ export default function Notification() {
     
   }
 
+  const handleNotificationClick = (notification) => {
+    // Générer le lien en fonction de la notification
+    let targetUrl = '';
+  
+    // Exemple de génération de lien basé sur `notification.data.table`
+    switch (notification.data.table) {
+      case 'Request':
+        targetUrl = `${basePath}/request/received`; // Assurez-vous que `id` est dans `notification.data`
+        break;
+      case 'Validation':
+        targetUrl = `${basePath}/request/sent`;
+        break;
+      case 'Employee':
+        targetUrl = `${basePath}/employee`;
+        break;
+      default:
+        targetUrl = `${basePath}/notifications`; // Fallback si aucun cas n'est trouvé
+    }
+  
+    // Rediriger l'utilisateur
+    navigate(targetUrl);
+  };
+
   const iconBackColorOpen = 'grey.100';
 
   return (
@@ -188,9 +211,7 @@ export default function Notification() {
                   >
                     {notifications.map((notification) => (
                       <Box key={notification.id}>
-                        <ListItemButton
-                         onClick={() => navigate(`${basePath}/notification/${notification.id}`)}
-                         >
+                        <ListItemButton onClick={() => handleNotificationClick(notification)}>
                           <ListItemAvatar>
                             <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>
                               📧 {/* Default Icon for Notifications */}
