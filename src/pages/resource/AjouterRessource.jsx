@@ -38,7 +38,7 @@ export default function AjouterRessource() {
   const [ isavailable2, setIsavailable2] = useState(false);
 
   const [resourceData, setResourceData] = useState({
-    id_user_holder: null,
+    id_holder: null,
     id_user_chief: user.matricule,
     label: '',
     discriminator: 'Accès',
@@ -78,11 +78,11 @@ export default function AjouterRessource() {
   const handleSubmit = async () => {
     try {
       await axis.post('/resource/new', resourceData);
-      alert('Ressource créée avec succès');
+      console.log('Ressource créée avec succès');
       handleClose();
     } catch (error) {
       console.error(error);
-      alert('Erreur lors de la création de la ressource');
+      console.log('Erreur lors de la création de la ressource');
     }
   };
 
@@ -107,8 +107,8 @@ export default function AjouterRessource() {
               <Typography>Bénéficiaire:</Typography>
               <Select
                 fullWidth
-                value={resourceData.id_user_holder || ''}
-                onChange={handleChange('id_user_holder')}
+                value={resourceData.id_holder || ''}
+                onChange={handleChange('id_holder')}
               >
                 <MenuItem value="">Aucun</MenuItem>
                 {employees.map((employee) => (

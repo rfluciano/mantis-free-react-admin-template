@@ -15,11 +15,11 @@ import { useStateContext } from 'contexts/contextProvider';
 const LogoSection = ({ sx, to }) => {
   const navigate = useNavigate();
   const { user } = useStateContext(); // Retrieve user or role context to determine the layout
-  console.log('User Discriminator:', user?.discriminator);
+  // console.log('User Discriminator:', user?.discriminator);
   
   // Determine basePath for navigation based on user role
   const basePath = user?.discriminator === 'unitychief' ? '/dashboard' : '/admin/dashboard';
-  console.log(basePath);
+  // console.log(basePath);
 
   return (
     <ButtonBase 

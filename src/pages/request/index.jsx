@@ -18,6 +18,7 @@ import ExportPopover from './ExportPopover';
 import ImportPopover from './ImportPopover';
 import axis from 'axis';
 import { useStateContext } from 'contexts/contextProvider';
+import { useNotification } from 'NotificationProvider';
 
 export default function Request() {
   const { user } = useStateContext();
@@ -27,7 +28,20 @@ export default function Request() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const notification = useNotification();
+  useEffect(() => {
+    if (notification?.model === 'Request') {
+      switch (notification.action) {
+        case 'created':
+        case 'modified':
+        case 'deleted':
+          fetchFilteredRequests();  // Call without the searchTerm to see all users
+          break;
+        default:
+          console.warn('Unhandled action:', notification.action);
+      }
+    }
+  }, [notification]);
   const fetchFilteredRequests = async (query) => {
     setIsLoading(true);
     try {
@@ -84,12 +98,12 @@ export default function Request() {
             onSearchChange={handleSearchChange} 
             isSmallScreen={isSmallScreen} 
           />
-          <AjouterRequete />
+          {/* <AjouterRequete /> */}
           <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>
             <FilterList />
           </IconButton>
           <ExportPopover />
-          <ImportPopover />
+          {/* <ImportPopover /> */}
         </Box>
       </Grid>
 

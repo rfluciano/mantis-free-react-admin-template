@@ -1,34 +1,29 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import Pagination from '@mui/material/Pagination';
-import { NumericFormat } from 'react-number-format';
+import { Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography, Pagination } from '@mui/material';
 import Dot from 'components/@extended/Dot';
-import axis from 'axis';
 import PositionMenu from './PositionMenu';
+import Modify from './Modify';
+import View from './View';
+import Disable from './Disable';
 
 const headCells = [
   { id: 'id_position', align: 'left', label: 'ID Poste' },
   { id: 'title', align: 'left', label: 'Titre' },
   { id: 'isavailable', align: 'left', label: 'Disponibilité' },
-  { id: 'created_at', align: 'left', label: 'Created At' },
-  { id: 'action', align: 'left', label: 'Action' },
+  { id: 'created_at', align: 'left', label: 'Date de création' },
+  { id: 'action', align: 'center', label: 'Action' },
 ];
 
+// Utility to handle descending comparison with null/empty checks
 function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) return -1;
-  if (b[orderBy] > a[orderBy]) return 1;
+  const valueA = a[orderBy];
+  const valueB = b[orderBy];
+
+  if (valueA === null || valueA === undefined || valueA === '') return 1;
+  if (valueB === null || valueB === undefined || valueB === '') return -1;
+  if (valueB < valueA) return -1;
+  if (valueB > valueA) return 1;
   return 0;
 }
 
@@ -64,9 +59,15 @@ function PositionTableHead({ order, orderBy, onRequestSort }) {
   );
 }
 
-function AvailabilityIndicator({ isAvailable }) {
-  const color = isAvailable ? 'success' : 'error';
-  const title = isAvailable ? 'Vacant' : 'Occupé';
+PositionTableHead.propTypes = {
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  orderBy: PropTypes.string.isRequired,
+  onRequestSort: PropTypes.func.isRequired,
+};
+
+function AvailabilityIndicator({ isavailable }) {
+  const color = isavailable ? 'success' : 'error';
+  const title = isavailable ? 'Disponible' : 'Occupé';
 
   return (
     <Stack direction="row" spacing={1} alignItems="center">
@@ -76,19 +77,28 @@ function AvailabilityIndicator({ isAvailable }) {
   );
 }
 
-export default function PositionTable() {
-  const [positions, setPositions] = useState([]);
+AvailabilityIndicator.propTypes = {
+  isavailable: PropTypes.bool.isRequired,
+};
+
+export default function PositionTable({ positions }) {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id_position');
   const [page, setPage] = useState(1);
-  const rowsPerPage = 9; // Set max rows per page to 9
+  const [openModal, setOpenModal] = useState('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+  
+  const handleAction = (action, employeeId) => {
+    setSelectedEmployeeId(employeeId);
+    setOpenModal(action);
+  };
 
-  useEffect(() => {
-    axis
-      .get('/position')
-      .then((response) => setPositions(response.data || []))
-      .catch((error) => console.error('Error fetching position data:', error));
-  }, []);
+  const handleCloseModal = () => {
+    setOpenModal(null);
+    setSelectedEmployeeId(null); // Clear selected employee after closing modal
+  };
+
+  const rowsPerPage = 8;
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -98,39 +108,36 @@ export default function PositionTable() {
 
   const handlePageChange = (event, newPage) => setPage(newPage);
 
-  const sortedAndPaginatedData = useMemo(() => {
-    const sortedData = [...positions].sort(getComparator(order, orderBy));
-    return sortedData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const sortedAndPaginatedPositions = useMemo(() => {
+    const sortedPositions = [...positions].sort(getComparator(order, orderBy));
+    return sortedPositions.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   }, [order, orderBy, page, positions]);
 
   return (
-    <Box sx={{margin:-2.5, padding:0}}>
+    <Box sx={{ margin: -2.5, padding: 0 }}>
       <TableContainer>
         <Table>
-          <PositionTableHead
-            order={order}
-            orderBy={orderBy}
-            onRequestSort={handleRequestSort}
-          />
+          <PositionTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>
-            {sortedAndPaginatedData.map((position) => (
-              <TableRow key={position.id_position} hover>
-                <TableCell>
-                  <Link color="secondary">{position.id_position}</Link>
-                </TableCell>
+            {sortedAndPaginatedPositions.map((position) => (
+              <TableRow key={position.id_position}>
+                <TableCell>{position.id_position}</TableCell>
                 <TableCell>{position.title}</TableCell>
                 <TableCell>
-                  <AvailabilityIndicator isAvailable={position.isavailable} />
+                  <AvailabilityIndicator isavailable={position.isavailable} />
                 </TableCell>
-                <TableCell>{new Date(position.created_at).toLocaleDateString()}</TableCell>
                 <TableCell>
-                  <PositionMenu/>
+                  {new Date(position.created_at).toLocaleDateString()}
+                </TableCell>
+                <TableCell align="center">
+                  <PositionMenu positionId={position.id_position} onAction={handleAction} /> {/* Replace with your menu */}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
       <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
         <Pagination
           count={Math.ceil(positions.length / rowsPerPage)}
@@ -139,16 +146,19 @@ export default function PositionTable() {
           color="primary"
         />
       </Box>
+      {openModal === 'modify' && (
+        <Modify employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'view' && (
+        <View employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'disable' && (
+        <Disable employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
+      )}
     </Box>
   );
 }
 
-PositionTableHead.propTypes = {
-  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-  orderBy: PropTypes.string.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-};
-
-AvailabilityIndicator.propTypes = {
-  isAvailable: PropTypes.bool.isRequired,
+PositionTable.propTypes = {
+  positions: PropTypes.array.isRequired,
 };

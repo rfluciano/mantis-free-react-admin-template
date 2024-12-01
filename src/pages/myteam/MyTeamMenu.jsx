@@ -10,7 +10,7 @@ import Divider from '@mui/material/Divider';
 
 const ITEM_HEIGHT = 48;
 
-export default function LongMenu({ employeeId, onAction }) {
+export default function MyteamMenu({ employeeId, onAction }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 

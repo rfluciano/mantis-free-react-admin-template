@@ -1,3 +1,4 @@
+import axis from 'axis';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -29,13 +30,29 @@ export const ContextProvider = ({ children }) => {
     });
   };
 
-  // Logout function to clear user and token
-  const logout = () => {
-    setUser(null); // Clear user state
-    setToken(null); // Clear token state
-    messageSuccess('You have been logged out successfully!');
+  const logout = async () => {
+    try {
+      const response = await axis.post('/logout', { // Update to backend URL
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Attach the token
+        },
+      });
+  
+      if (response.ok) {
+        setUser(null); // Clear user state
+        setToken(null); // Clear token state
+        messageSuccess('You have been logged out successfully!');
+      } else {
+        const data = await response.json();
+        messageError(data.message || 'Failed to log out. Please try again.');
+      }
+    } catch (error) {
+      messageError('An error occurred during logout. Please try again.');
+    }
   };
-
+  
+  
   // Update localStorage whenever user or token changes
   useEffect(() => {
     if (user) {

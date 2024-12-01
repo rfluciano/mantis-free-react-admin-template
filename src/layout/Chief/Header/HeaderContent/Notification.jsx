@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import axis from 'axis';
 
-// material-ui
+// material-ui imports
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Avatar from '@mui/material/Avatar';
@@ -20,7 +20,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
-// project import
+// project-specific imports
 import MainCard from 'components/MainCard';
 import Transitions from 'components/@extended/Transitions';
 
@@ -29,57 +29,82 @@ import BellOutlined from '@ant-design/icons/BellOutlined';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import { useNavigate } from 'react-router';
 import { useStateContext } from 'contexts/contextProvider';
+import { useNotification } from 'NotificationProvider';
+import iPhone_notification_sound from '../../../../assets/audio/iPhone_notification_sound.mp3';
 
-// Styles
+// styles
 const avatarSX = { width: 36, height: 36, fontSize: '1rem' };
 const actionSX = { mt: '6px', ml: 1, alignSelf: 'flex-start', transform: 'none' };
 
 export default function Notification() {
   const theme = useTheme();
   const matchesXs = useMediaQuery(theme.breakpoints.down('md'));
-
+  const audioRef = useRef(new Audio(iPhone_notification_sound));
   const anchorRef = useRef(null);
+
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
   const { user } = useStateContext();
   const basePath = user?.discriminator === 'unitychief' ? '' : '/admin';
+  const notification = useNotification();
 
-  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      const response = await axis.get(`/notifications/${user.matricule}`);
+      const sortedNotifications = response.data
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 6);
+      setNotifications(sortedNotifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await axis.get(`/notifications/${user.matricule}`);
-        const sortedNotifications = response.data
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-          .slice(0, 6); // Keep only the 6 most recent notifications
-        setNotifications(sortedNotifications);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      }
-    };
     fetchNotifications();
   }, [user.matricule]);
 
-  const handleToggle = () => setOpen((prevOpen) => !prevOpen);
+  useEffect(() => {
+    if (notification?.model && ['Request', 'Validation', 'Employee'].includes(notification.model)) {
+      fetchNotifications();
+    }
+  }, [notification]);
+
+  useEffect(() => {
+    const unreadNotifications = notifications.filter((n) => !n.is_read);
+    if (unreadNotifications.length > 0) {
+      audioRef.current.play().catch((error) => console.error('Audio playback failed:', error));
+    }
+  }, [notifications]);
+
+  const handleToggle = async () => {
+    setOpen((prevOpen) => !prevOpen);
+    if (!open) {
+      try {
+        await axis.put('/notifications/mark-all-as-read');
+        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      } catch (error) {
+        console.error('Error marking notifications as read:', error);
+      }
+    }
+  };
+
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) return;
     setOpen(false);
   };
 
-  const Basy = () => {
-    navigate(`${basePath}/notification`).then(handleClose)
-    
-  }
-
-  const iconBackColorOpen = 'grey.100';
+  const handleNavigateToAll = () => {
+    navigate(`${basePath}/notification`).then(handleClose);
+  };
 
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
       <IconButton
         color="secondary"
         variant="light"
-        sx={{ color: 'text.primary', bgcolor: open ? iconBackColorOpen : 'transparent' }}
+        sx={{ color: 'text.primary', bgcolor: open ? 'grey.100' : 'transparent' }}
         aria-label="open notifications"
         ref={anchorRef}
         aria-controls={open ? 'profile-grow' : undefined}
@@ -101,7 +126,14 @@ export default function Notification() {
       >
         {({ TransitionProps }) => (
           <Transitions type="grow" position={matchesXs ? 'top' : 'top-right'} in={open} {...TransitionProps}>
-            <Paper sx={{ boxShadow: theme.customShadows.z1, width: '100%', minWidth: 285, maxWidth: { xs: 285, md: 420 } }}>
+            <Paper
+              sx={{
+                boxShadow: theme.customShadows.z1,
+                width: '100%',
+                minWidth: 285,
+                maxWidth: { xs: 285, md: 420 },
+              }}
+            >
               <ClickAwayListener onClickAway={handleClose}>
                 <MainCard
                   title="Notifications"
@@ -139,20 +171,12 @@ export default function Notification() {
                   >
                     {notifications.map((notification) => (
                       <Box key={notification.id}>
-                        <ListItemButton
-                         onClick={() => navigate(`${basePath}/notification/${notification.id}`)}
-                         >
+                        <ListItemButton onClick={() => navigate(`${basePath}/notification/${notification.id}`)}>
                           <ListItemAvatar>
-                            <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>
-                              📧 {/* Default Icon for Notifications */}
-                            </Avatar>
+                            <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>📧</Avatar>
                           </ListItemAvatar>
                           <ListItemText
-                            primary={
-                              <Typography variant="h6">
-                                {notification.message}
-                              </Typography>
-                            }
+                            primary={<Typography variant="h6">{notification.message}</Typography>}
                             secondary={
                               new Date(notification.created_at).toLocaleDateString() ===
                               new Date().toLocaleDateString()
@@ -169,7 +193,7 @@ export default function Notification() {
                         <Divider />
                       </Box>
                     ))}
-                    <ListItemButton sx={{ textAlign: 'center', py: `${12}px !important` }} onClick={() => Basy()}>
+                    <ListItemButton sx={{ textAlign: 'center', py: '12px !important' }} onClick={handleNavigateToAll}>
                       <ListItemText
                         primary={
                           <Typography variant="h6" color="primary">

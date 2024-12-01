@@ -49,7 +49,7 @@ export default function AjouterRequete() {
       try {
         const resourcesResponse = await axis.get('/resource/mandeha');
         const employeeResponse = await axis.get('/employee');
-        setResources(resourcesResponse.data);
+        setResources(resourcesResponse.data?.resource);
         setEmployees(employeeResponse.data.employees);
       } catch (err) {
         console.error(err);
@@ -80,11 +80,11 @@ export default function AjouterRequete() {
       };
 
       await axis.post('/request/new', payload);
-      alert('Requête créée avec succès');
+      console.log('Requête créée avec succès');
       handleClose();
     } catch (error) {
       console.error(error);
-      alert('Erreur lors de la création de la requête');
+      console.log('Erreur lors de la création de la requête');
     }
   };
 

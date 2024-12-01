@@ -3,10 +3,14 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Divider from '@mui/material/Divider';
 
 const ITEM_HEIGHT = 48;
 
-export default function PositionMenu() {
+export default function LongMenu({ employeeId, onAction }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -18,15 +22,18 @@ export default function PositionMenu() {
     setAnchorEl(null);
   };
 
-  const handleModify = () => {
-    // Placeholder function for modifying
-    console.log("Modifier option clicked");
+  const handleView = () => {
+    onAction('view', employeeId);
     handleClose();
   };
 
-  const handleDelete = () => {
-    // Placeholder function for deleting
-    console.log("Supprimer option clicked");
+  const handleModify = () => {
+    onAction('modify', employeeId);
+    handleClose();
+  };
+
+  const handleDisable = () => {
+    onAction('disable', employeeId);
     handleClose();
   };
 
@@ -36,7 +43,6 @@ export default function PositionMenu() {
         aria-label="more"
         id="long-button"
         aria-controls={open ? 'long-menu' : undefined}
-        aria-expanded={open ? 'true' : undefined}
         aria-haspopup="true"
         onClick={handleClick}
       >
@@ -44,9 +50,6 @@ export default function PositionMenu() {
       </IconButton>
       <Menu
         id="long-menu"
-        MenuListProps={{
-          'aria-labelledby': 'long-button',
-        }}
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
@@ -60,26 +63,73 @@ export default function PositionMenu() {
         }}
       >
         <MenuItem
-          onClick={handleModify}
+          onClick={handleView}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
             '&:hover': {
-              backgroundColor: 'rgba(0, 0, 255, 0.1)' // Light blue hover
+              backgroundColor: 'rgba(0, 0, 255, 0.1)', // Light blue hover
             },
-            color: 'blue'
+            color: 'black',
           }}
         >
+          <VisibilityIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}} />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
+          Voir info
+        </MenuItem>
+        <MenuItem
+          onClick={handleModify}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 255, 0, 0.1)', // Light green hover
+            },
+            color: 'black',
+          }}
+        >
+          <EditIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}} />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
           Modifier
         </MenuItem>
         <MenuItem
-          onClick={handleDelete}
+          onClick={handleDisable}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
             '&:hover': {
-              backgroundColor: 'rgba(255, 0, 0, 0.1)' // Light red hover
+              backgroundColor: 'rgba(255, 0, 0, 0.1)', // Light red hover
             },
-            color: 'red'
+            color: 'black',
           }}
         >
-          Supprimer
+          <DeleteIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}}/>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
+          Archiver
         </MenuItem>
       </Menu>
     </div>

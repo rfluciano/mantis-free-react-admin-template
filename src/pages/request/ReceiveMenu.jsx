@@ -3,10 +3,15 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Divider from '@mui/material/Divider';
+import { Check, NoAccounts } from '@mui/icons-material';
 
 const ITEM_HEIGHT = 48;
 
-export default function ReceiveMenu() {
+export default function ReceiveMenu({ requestId, onAction }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -18,47 +23,34 @@ export default function ReceiveMenu() {
     setAnchorEl(null);
   };
 
+  const handleView = () => {
+    onAction('view', requestId);
+    handleClose();
+  };
+
   const handleValidate = () => {
-    // Placeholder function for deleting
-    console.log("Valider option clicked");
+    onAction('validate', requestId); // Correction : Appeler 'validate' pour "Valider"
     handleClose();
   };
-
+  
   const handleReject = () => {
-    // Placeholder function for deleting
-    console.log("Rejeter option clicked");
+    onAction('reject', requestId); // Correction : Appeler 'reject' pour "Rejeter"
     handleClose();
   };
-
-//   const handleModify = () => {
-//     // Placeholder function for modifying
-//     console.log("Modifier option clicked");
-//     handleClose();
-//   };
-
-//   const handleDelete = () => {
-//     // Placeholder function for deleting
-//     console.log("Supprimer option clicked");
-//     handleClose();
-//   };
 
   return (
     <div>
       <IconButton
         aria-label="more"
-        id="long-button"
-        aria-controls={open ? 'long-menu' : undefined}
-        aria-expanded={open ? 'true' : undefined}
+        id="receive-button"
+        aria-controls={open ? 'receive-menu' : undefined}
         aria-haspopup="true"
         onClick={handleClick}
       >
         <MoreVertIcon />
       </IconButton>
       <Menu
-        id="long-menu"
-        MenuListProps={{
-          'aria-labelledby': 'long-button',
-        }}
+        id="receive-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
@@ -72,49 +64,74 @@ export default function ReceiveMenu() {
         }}
       >
         <MenuItem
-          onClick={handleValidate}
+          onClick={handleView}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
             '&:hover': {
-              backgroundColor: 'rgba(0, 250, 0, 0.1)' // Light red hover
+              backgroundColor: 'rgba(0, 0, 255, 0.1)', // Light blue hover
             },
-            color: 'black'
+            color: 'black',
           }}
         >
+          <VisibilityIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}} />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
+          Voir info
+        </MenuItem>
+        <MenuItem
+          onClick={handleValidate}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 255, 0, 0.1)', // Light green hover
+            },
+            color: 'black',
+          }}
+        >
+          <Check sx={{ marginRight: 1 , width:18, color: "darkslategrey"}} />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
           Valider
         </MenuItem>
         <MenuItem
           onClick={handleReject}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
             '&:hover': {
-              backgroundColor: 'rgba(255, 150, 0, 0.1)' // Light red hover
+              backgroundColor: 'rgba(255, 0, 0, 0.1)', // Light red hover
             },
-            color: 'black'
+            color: 'black',
           }}
         >
+          <NoAccounts sx={{ marginRight: 1 , width:18, color: "darkslategrey"}}/>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
           Rejeter
         </MenuItem>
-        {/* <MenuItem
-          onClick={handleModify}
-          sx={{
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 255, 0.1)' // Light blue hover
-            },
-            color: 'black'
-          }}
-        >
-          Modifier
-        </MenuItem>
-        <MenuItem
-          onClick={handleDelete}
-          sx={{
-            '&:hover': {
-              backgroundColor: 'rgba(255, 0, 0, 0.1)' // Light red hover
-            },
-            color: 'black'
-          }}
-        >
-          Supprimer
-        </MenuItem> */}
       </Menu>
     </div>
   );

@@ -1,112 +1,122 @@
-import React, { useState } from 'react';
-import { 
-  Grid, 
-  Typography, 
-  useMediaQuery, 
-  useTheme, 
-  IconButton, 
-  Box 
+import React, { useEffect, useState } from 'react';
+import {
+  Grid,
+  Typography,
+  useMediaQuery,
+  useTheme,
+  IconButton,
+  Box,
+  CircularProgress,
 } from '@mui/material';
 import { FilterList } from '@mui/icons-material';
 import MainCard from 'components/MainCard';
 import PositionTable from './PositionTable';
-import PositionFilter from './PositionFilter'; // Position-specific filter
-
-// Modularized Components
+import PositionFilter from './PositionFilter';
+import AjouterPosition from './Ajouter';
 import SearchInput from './SearchInput';
 import ExportPopover from './ExportPopover';
 import ImportPopover from './ImportPopover';
-import Ajouterposition from './Ajouter';
+import { useNotification } from 'NotificationProvider';
+import axis from 'axis';
 
-export default function PositionList() {
-  const theme = useTheme(); // Access the theme
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // Use theme for breakpoint
+export default function Position() {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filters, setFilters] = useState({}); // This will store the applied filters
+  const [positions, setPositions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const notification = useNotification();
+  
 
-  // Search handler
-  const handleSearchChange = (event) => setSearchTerm(event.target.value);
+  useEffect(() => {
+    if (notification?.model === 'Position') {
+      switch (notification.action) {
+        case 'created':
+        case 'modified':
+        case 'deleted':
+          fetchPositions(); // Actualise la liste
+          break;
+        default:
+          console.warn('Action non gérée:', notification.action);
+      }
+    }
+  }, [notification]);
 
-  // Apply filter and close modal
-  const handleFilterApply = (appliedFilters) => {
-    setFilters(appliedFilters); // Set the applied filters
-    setIsFilterOpen(false); // Close the filter modal
+  const fetchPositions = async (query = '') => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Remplacez axis par votre méthode API appropriée
+      const response = await axis.get(query ? `/position/search?query=${query}` : '/position');
+      setPositions(response.data || []);
+    } catch (err) {
+      console.error('Erreur API:', err);
+      setError('Une erreur s’est produite lors du chargement des postes.');
+      setPositions([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Open filter modal
-  const handleFilterOpen = () => setIsFilterOpen(true);
+  const handleSearchChange = (event) => {
+    const newSearchTerm = event.target.value.trim();
+    setSearchTerm(newSearchTerm);
+    fetchPositions(newSearchTerm);
+  };
+
+  const handleFilterApply = (appliedFilters) => {
+    // Applique les filtres et recharge les données
+    console.log('Filtres appliqués:', appliedFilters);
+    setIsFilterOpen(false);
+  };
+
+  useEffect(() => {
+    fetchPositions();
+  }, []);
 
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      {/* Header */}
       <Grid item xs={12}>
         <Typography variant="h5" sx={{ mb: 0 }}>
           Liste des postes
         </Typography>
       </Grid>
 
-      {/* Table Options */}
       <Grid item xs={12}>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          flexWrap="wrap"
-          gap={isSmallScreen ? 2 : 1}
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            mb: -3,
-          }}
-        >
-          {/* Search Input */}
-          <SearchInput 
-            searchTerm={searchTerm} 
-            onSearchChange={handleSearchChange} 
-            isSmallScreen={isSmallScreen} 
-          />
-
-          {/* Ajouter Button */}
-          <Ajouterposition />
-
-          {/* Filter Button */}
-          <IconButton aria-label="Filtrer" onClick={handleFilterOpen}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={isSmallScreen ? 2 : 1}>
+          <SearchInput searchTerm={searchTerm} onSearchChange={handleSearchChange} isSmallScreen={isSmallScreen} />
+          <AjouterPosition />
+          <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>
             <FilterList />
           </IconButton>
-
-          {/* Export Button */}
           <ExportPopover />
-
-          {/* Import Button */}
           <ImportPopover />
         </Box>
       </Grid>
 
-      {/* Position Table */}
       <Grid item xs={12}>
-        <MainCard
-          sx={{
-            p: 0,
-            width: '100%',
-            '& > .MuiBox-root': {
-              margin: 0,
-            },
-          }}
-        >
-          <PositionTable 
-            searchTerm={searchTerm} 
-            filters={filters} // Pass filters to the table
-          />
+        <MainCard sx={{ p: 0, width: '100%' }}>
+          {isLoading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
+              <Typography variant="body1" color="error">{error}</Typography>
+            </Box>
+          ) : positions.length === 0 ? (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
+              <Typography variant="body1">Aucune donnée trouvée.</Typography>
+            </Box>
+          ) : (
+            <PositionTable positions={positions} />
+          )}
         </MainCard>
       </Grid>
 
-      {/* Position Filter Modal */}
-      <PositionFilter 
-        open={isFilterOpen} 
-        onClose={() => setIsFilterOpen(false)} 
-        onApply={handleFilterApply} // Pass callback to apply the filter
-      />
+      <PositionFilter open={isFilterOpen} onClose={() => setIsFilterOpen(false)} onApply={handleFilterApply} />
     </Grid>
   );
 }

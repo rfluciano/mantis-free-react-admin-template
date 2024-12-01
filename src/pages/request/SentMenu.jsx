@@ -5,12 +5,12 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import CancelIcon from '@mui/icons-material/Cancel'; // Import CancelIcon
 import Divider from '@mui/material/Divider';
 
 const ITEM_HEIGHT = 48;
 
-export default function SentMenu() {
+export default function SentMenu({ requestId, onAction }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -22,13 +22,18 @@ export default function SentMenu() {
     setAnchorEl(null);
   };
 
-  const handleModify = () => {
-    console.log("Modifier option clicked");
+  const handleView = () => {
+    onAction('view', requestId);
     handleClose();
   };
 
-  const handleDelete = () => {
-    console.log("Supprimer option clicked");
+  const handleModify = () => {
+    onAction('modify', requestId);
+    handleClose();
+  };
+
+  const handleDisable = () => {
+    onAction('disable', requestId);
     handleClose();
   };
 
@@ -36,19 +41,15 @@ export default function SentMenu() {
     <div>
       <IconButton
         aria-label="more"
-        id="long-button"
-        aria-controls={open ? 'long-menu' : undefined}
-        aria-expanded={open ? 'true' : undefined}
+        id="sent-button"
+        aria-controls={open ? 'sent-menu' : undefined}
         aria-haspopup="true"
         onClick={handleClick}
       >
         <MoreVertIcon />
       </IconButton>
       <Menu
-        id="long-menu"
-        MenuListProps={{
-          'aria-labelledby': 'long-button',
-        }}
+        id="sent-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
@@ -62,7 +63,7 @@ export default function SentMenu() {
         }}
       >
         <MenuItem
-          onClick={handleModify}
+          onClick={handleView}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -72,7 +73,7 @@ export default function SentMenu() {
             color: 'black',
           }}
         >
-          <VisibilityIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}}  />
+          <VisibilityIcon sx={{ marginRight: 1, width: 18, color: 'darkslategrey' }} />
           <Divider
             orientation="vertical"
             flexItem
@@ -95,7 +96,7 @@ export default function SentMenu() {
             color: 'black',
           }}
         >
-          <EditIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}}  />
+          <EditIcon sx={{ marginRight: 1, width: 18, color: 'darkslategrey' }} />
           <Divider
             orientation="vertical"
             flexItem
@@ -108,7 +109,7 @@ export default function SentMenu() {
           Modifier
         </MenuItem>
         <MenuItem
-          onClick={handleDelete}
+          onClick={handleDisable}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -118,7 +119,7 @@ export default function SentMenu() {
             color: 'black',
           }}
         >
-          <DeleteIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}} />
+          <CancelIcon sx={{ marginRight: 1, width: 18, color: 'darkslategrey' }} />
           <Divider
             orientation="vertical"
             flexItem
@@ -128,7 +129,7 @@ export default function SentMenu() {
               marginX: 1,
             }}
           />
-          Supprimer
+          Annuler
         </MenuItem>
       </Menu>
     </div>

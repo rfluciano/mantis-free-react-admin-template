@@ -18,8 +18,9 @@ import axis from 'axis';
 import { useStateContext } from 'contexts/contextProvider';
 import EmployeeTable from './EmployeeTable';
 import EmployeeFilter from './EmployeeFilter';
+import { useNotification } from 'NotificationProvider';
 
-export default function Receive() {
+export default function Employee() {
   const theme = useTheme();
   const { user } = useStateContext();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -27,26 +28,43 @@ export default function Receive() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [employee, setEmployee] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const notification = useNotification();
+  useEffect(() => {
+    if (notification?.model === 'Employee') {
+      switch (notification.action) {
+        case 'created':
+        case 'modified':
+        case 'deleted':
+          fetchEmployees('');
+          break;
+        default:
+          console.warn('Unhandled action:', notification.action);
+      }
+    }
+  }, [notification]);
 
-  // Fetch received employees based on the search term
   const fetchEmployees = async (query) => {
     setIsLoading(true);
     try {
+      const searchQuery = query?.trim?.() || ''; // Safely trim or default to an empty string
       let response;
-      if (query.trim() === '') {
-        // Fetch all received employees when the search term is empty
-        response = await axis.get(`/employee`)
+  
+      if (searchQuery === '') {
+        // Fetch all employees
+        response = await axis.get('/employee');
       } else {
-        // Fetch filtered employees based on search query
-        response = await axis.get('/search/employee',{query});
+        // Fetch filtered employees
+        response = await axis.get('/search/employee', { query: searchQuery });
       }
-      setEmployee(response.data);
+  
+      setEmployee(response.data.employees);
     } catch (error) {
       console.error('Failed to fetch employees:', error);
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   // Handle changes in search input
   const handleSearchChange = (event) => {

@@ -17,6 +17,9 @@ import Dot from 'components/@extended/Dot';
 import SentMenu from './SentMenu';
 import { useStateContext } from 'contexts/contextProvider';
 import axis from 'axis';
+import View from './View';
+import Modify from './Modify';
+import Disable from './Disable';
 
 const headCells = [
   { id: 'id_request', align: 'left', label: 'ID Requête' },
@@ -125,6 +128,7 @@ const StyledValueBox = ({ children }) => (
       backgroundColor: 'rgba(173, 216, 230, 0.3)', // Light blue, nearly transparent
       borderRadius: '5px',
       padding: '4px 8px',
+      marginRight: '5px',
       fontWeight: 500,
     }}
   >
@@ -132,7 +136,7 @@ const StyledValueBox = ({ children }) => (
   </Box>
 );
 
-export default function AllRequestTable({ requests }) {
+export default function SentRequestTable({ requests }) {
   // Utility function to format values
 const formatValue = (value) => {
   if (value === null || value === undefined || value === '') {
@@ -140,11 +144,24 @@ const formatValue = (value) => {
   }
   return value;
 };
+
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id_request');
   const [page, setPage] = useState(1);
-  const rowsPerPage = 9;
+  const rowsPerPage = 8;
   const [isLoading, setIsLoading] = useState(true);
+  const [openModal, setOpenModal] = useState('');
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
+  
+  const handleAction = (action, requestId) => {
+    setSelectedRequestId(requestId);
+    setOpenModal(action);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(null);
+    setSelectedRequestId(null); // Clear selected employee after closing modal
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -173,7 +190,7 @@ const formatValue = (value) => {
         )}
       </TableCell>
       <TableCell>{formatValue(request.resource?.label)}</TableCell>
-      <TableCell>{formatValue(request.receiver?.matricule)}</TableCell>
+      <TableCell>{formatValue(request.requester?.matricule)}</TableCell>
       <TableCell>{formatValue(request.beneficiary?.matricule)}</TableCell>
       <TableCell>
         {formatValue(
@@ -183,13 +200,11 @@ const formatValue = (value) => {
       {/* <TableCell>{formatValue(request.validation?.rejection_reason)}</TableCell> */}
       <TableCell>{formatValue(request.validation?.validation_date)}</TableCell>
       <TableCell align="center">
-        {formatValue(<SentMenu />)}
+        {formatValue(<SentMenu requestId={request.id_request} onAction={handleAction}/>)}
       </TableCell>
     </TableRow>
   ))}
 </TableBody>
-
-
         </Table>
       </TableContainer>
 
@@ -201,11 +216,20 @@ const formatValue = (value) => {
           color="primary"
         />
       </Box>
+      {openModal === 'modify' && (
+        <Modify requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'view' && (
+        <View requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'disable' && (
+        <Disable requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
     </Box>
   );
 }
 
-AllRequestTable.propTypes = {
+SentRequestTable.propTypes = {
   requests: PropTypes.array.isRequired,
 };
 

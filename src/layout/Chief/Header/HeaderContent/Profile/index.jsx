@@ -67,11 +67,6 @@ export default function Profile() {
     setOpen((prevOpen) => !prevOpen);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  }
-
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
       return;
@@ -106,7 +101,7 @@ export default function Profile() {
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ p: 0.5 }}>
           <Avatar alt="profile user" src={avatar1} size="sm" />
           <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
-            {user.employee.name || 'Doe'} {user.employee.firstname || 'John'}
+            {user?.username || 'John Doe'}
           </Typography>
         </Stack>
       </ButtonBase>
@@ -139,16 +134,16 @@ export default function Profile() {
                         <Stack direction="row" spacing={1.25} alignItems="center">
                           <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                           <Stack>
-                            <Typography variant="h6">{user.employee.firstname || 'Doe'} {user.employee.name || 'John'}</Typography> {/* Replace with user name */}
+                            <Typography variant="h6">{user?.employee.firstname || 'Doe'} {user?.employee.name || 'John'}</Typography> {/* Replace with user name */}
                             <Typography variant="body2" color="text.secondary">
-                              {user.employee.position.title || 'UI/UX Designer'} {/* Replace with user position */}
+                              {user?.employee.position.title || 'UI/UX Designer'} {/* Replace with user position */}
                             </Typography>
                           </Stack>
                         </Stack>
                       </Grid>
                       <Grid item>
                         <Tooltip title="Logout">
-                        <IconButton size="large" sx={{ color: 'text.primary' }} onClick={() => { console.log('Logout clicked'); handleLogout(); }}>
+                        <IconButton size="large" sx={{ color: 'text.primary' }} onClick={() => { console.log('Logout clicked'); logout(); }}>
                             <LogoutOutlined />
                         </IconButton>
                         </Tooltip>
@@ -175,7 +170,6 @@ export default function Profile() {
                   <TabPanel value={value} index={0} dir={theme.direction}>
                     <ProfileTab handleClose={handleClose} />
                   </TabPanel>
-
                 </MainCard>
               </ClickAwayListener>
             </Paper>

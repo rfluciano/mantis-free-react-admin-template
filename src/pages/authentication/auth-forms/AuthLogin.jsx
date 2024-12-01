@@ -100,7 +100,7 @@ export default function AuthLogin() {
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
                                 <Stack spacing={1}>
-                                    <InputLabel htmlFor="query-login">Username or Matricule</InputLabel>
+                                    <InputLabel htmlFor="query-login">Nom d'utilisateur ou Matricule</InputLabel>
                                     <OutlinedInput
                                         id="query-login"
                                         type="text"
@@ -108,7 +108,7 @@ export default function AuthLogin() {
                                         name="query"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
-                                        placeholder="Enter username or matricule"
+                                        placeholder="Entrer nom d'utilisateur ou matricule"
                                         fullWidth
                                         error={Boolean(touched.query && errors.query)}
                                     />
@@ -122,7 +122,7 @@ export default function AuthLogin() {
 
                             <Grid item xs={12}>
                                 <Stack spacing={1}>
-                                    <InputLabel htmlFor="password-login">Password</InputLabel>
+                                    <InputLabel htmlFor="password-login">Mot de passe</InputLabel>
                                     <OutlinedInput
                                         fullWidth
                                         error={Boolean(touched.password && errors.password)}
@@ -145,7 +145,7 @@ export default function AuthLogin() {
                                                 </IconButton>
                                             </InputAdornment>
                                         }
-                                        placeholder="Enter password"
+                                        placeholder="Entrer mot de passe"
                                     />
                                 </Stack>
                                 {touched.password && errors.password && (
@@ -167,10 +167,10 @@ export default function AuthLogin() {
                                                 size="small"
                                             />
                                         }
-                                        label={<Typography variant="h6">Keep me signed in</Typography>}
+                                        label={<Typography variant="h6">Rester connecté</Typography>}
                                     />
                                     <Link variant="h6" component={RouterLink} to="/forgot-password" color="text.primary">
-                                        Forgot Password?
+                                        Mot de passe oublié?
                                     </Link>
                                 </Stack>
                             </Grid>
@@ -192,7 +192,7 @@ export default function AuthLogin() {
                                         variant="contained"
                                         color="primary"
                                     >
-                                        Login
+                                        Se connecter
                                     </Button>
                                 </AnimateButton>
                             </Grid>

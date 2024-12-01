@@ -17,6 +17,7 @@ import Pagination from '@mui/material/Pagination'; // Here is the pagination com
 import LongMenu from './MyResourceMenu';
 import { useStateContext } from 'contexts/contextProvider';
 import Dot from 'components/@extended/Dot';
+import ResourceMenu from './RessourceMenu';
 
 function descendingComparator(a, b, orderBy) {
   const valueA = a[orderBy];
@@ -49,8 +50,8 @@ const headCells = [
   { id: 'description', align: 'left', label: 'Description' },
   { id: 'isavailable', align: 'left', label: 'Disponibilité' },
   { id: 'id_user_chief', align: 'left', label: 'Responsable' },
-  { id: 'id_user_holder', align: 'left', label: 'Propriétaire' },
-  { id: 'action', align: 'left', label: '' },
+  { id: 'id_holder', align: 'left', label: 'Propriétaire' },
+  { id: 'action', align: 'left', label: 'Action' },
 ];
 
 function ResourceTableHead({ order, orderBy, onRequestSort, onSelectAllClick, numSelected, rowCount }) {
@@ -115,8 +116,23 @@ function AvailabilityIndicator({ isavailable }) {
 }
 
 AvailabilityIndicator.propTypes = {
-  isavailable: PropTypes.bool.isRequired,
+  isavailable: PropTypes.string.isRequired,
 };
+
+const StyledValueBox = ({ children }) => (
+  <Box
+    sx={{
+      display: 'inline-block',
+      backgroundColor: 'rgba(173, 216, 230, 0.3)', // Light blue
+      borderRadius: '5px',
+      padding: '4px 8px',
+      fontWeight: 500,
+    }}
+  >
+    {children}
+  </Box>
+);
+
 
 export default function ResourceTable() {
   const { user, messageSuccess, messageError } = useStateContext();
@@ -124,8 +140,27 @@ export default function ResourceTable() {
   const [orderBy, setOrderBy] = useState('id_resource');
   const [resources, setResources] = useState([]);
   const [selected, setSelected] = useState([]);
+  const [openModal, setOpenModal] = useState('');
+  const handleAction = (action, employeeId) => {
+    setSelectedRequestId(employeeId);
+    setOpenModal(action);
+  };
+
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return <StyledValueBox>--//--</StyledValueBox>;
+    }
+    return value;
+  };
+  
+
+  const handleCloseModal = () => {
+    setOpenModal(null);
+    setSelectedRequestId(null); // Clear selected employee after closing modal
+  };
+  const [selectedEmployeeId, setSelectedRequestId] = useState(null);
   const [page, setPage] = useState(1); // Use 1-based page
-  const rowsPerPage = 9; // You can set rows per page as needed
+  const rowsPerPage = 8; // You can set rows per page as needed
 
   useEffect(() => {
     axis.get(`/resource`)
@@ -230,14 +265,14 @@ export default function ResourceTable() {
                       onClick={(event) => handleClick(event, resource.id_resource)}
                     />
                   </TableCell>
-                  <TableCell>{resource.id_resource}</TableCell>
-                  <TableCell>{resource.label}</TableCell>
-                  <TableCell>{resource.discriminator === 'Accès' ? 'Accès' : 'Equipement'}</TableCell>
-                  <TableCell>{resource.description}</TableCell>
+                  <TableCell>{formatValue(resource.id_resource)}</TableCell>
+                  <TableCell>{formatValue(resource.label)}</TableCell>
+                  <TableCell>{formatValue(resource.discriminator === 'Accès' ? 'Accès' : 'Equipement')}</TableCell>
+                  <TableCell>{formatValue(resource.description)}</TableCell>
                   <TableCell><AvailabilityIndicator isavailable={resource.isavailable} /></TableCell>
-                  <TableCell>{resource.id_user_chief}</TableCell>
-                  <TableCell>{resource.id_user_holder}</TableCell>
-                  <TableCell><LongMenu employeeId={resource.id_resource} /></TableCell>
+                  <TableCell>{formatValue(resource.id_user_chief)}</TableCell>
+                  <TableCell>{formatValue(resource.id_holder)}</TableCell>
+                  <TableCell><ResourceMenu ResourceId={resource.id_resource} handleAction/></TableCell>
                 </TableRow>
               );
             })}
@@ -252,6 +287,15 @@ export default function ResourceTable() {
           color="primary"
         />
       </Box>
+      {openModal === 'modify' && (
+        <Modify requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'view' && (
+        <View requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'disable' && (
+        <Disable requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
     </Box>
   );
 }

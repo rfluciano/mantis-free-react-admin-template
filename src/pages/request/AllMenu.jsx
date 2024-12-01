@@ -3,10 +3,14 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Divider from '@mui/material/Divider';
 
 const ITEM_HEIGHT = 48;
 
-export default function AllMenu() {
+export default function AllMenu({ employeeId, onAction }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -18,27 +22,18 @@ export default function AllMenu() {
     setAnchorEl(null);
   };
 
-  const handleValidate = () => {
-    // Placeholder function for deleting
-    console.log("Valider option clicked");
-    handleClose();
-  };
-
-  const handleReject = () => {
-    // Placeholder function for deleting
-    console.log("Rejeter option clicked");
+  const handleView = () => {
+    onAction('view', employeeId);
     handleClose();
   };
 
   const handleModify = () => {
-    // Placeholder function for modifying
-    console.log("Modifier option clicked");
+    onAction('modify', employeeId);
     handleClose();
   };
 
-  const handleDelete = () => {
-    // Placeholder function for deleting
-    console.log("Supprimer option clicked");
+  const handleDisable = () => {
+    onAction('disable', employeeId);
     handleClose();
   };
 
@@ -48,7 +43,6 @@ export default function AllMenu() {
         aria-label="more"
         id="long-button"
         aria-controls={open ? 'long-menu' : undefined}
-        aria-expanded={open ? 'true' : undefined}
         aria-haspopup="true"
         onClick={handleClick}
       >
@@ -56,9 +50,6 @@ export default function AllMenu() {
       </IconButton>
       <Menu
         id="long-menu"
-        MenuListProps={{
-          'aria-labelledby': 'long-button',
-        }}
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
@@ -72,48 +63,73 @@ export default function AllMenu() {
         }}
       >
         <MenuItem
-          onClick={handleReject}
+          onClick={handleView}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
             '&:hover': {
-              backgroundColor: 'rgba(0, 250, 0, 0.1)' // Light red hover
+              backgroundColor: 'rgba(0, 0, 255, 0.1)', // Light blue hover
             },
-            color: 'black'
+            color: 'black',
           }}
         >
-          Valider
-        </MenuItem>
-        <MenuItem
-          onClick={handleDelete}
-          sx={{
-            '&:hover': {
-              backgroundColor: 'rgba(255, 150, 0, 0.1)' // Light red hover
-            },
-            color: 'black'
-          }}
-        >
-          Rejeter
+          <VisibilityIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}} />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
+          Voir info
         </MenuItem>
         <MenuItem
           onClick={handleModify}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
             '&:hover': {
-              backgroundColor: 'rgba(0, 0, 255, 0.1)' // Light blue hover
+              backgroundColor: 'rgba(0, 255, 0, 0.1)', // Light green hover
             },
-            color: 'black'
+            color: 'black',
           }}
         >
+          <EditIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}} />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
           Modifier
         </MenuItem>
         <MenuItem
-          onClick={handleDelete}
+          onClick={handleDisable}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
             '&:hover': {
-              backgroundColor: 'rgba(255, 0, 0, 0.1)' // Light red hover
+              backgroundColor: 'rgba(255, 0, 0, 0.1)', // Light red hover
             },
-            color: 'black'
+            color: 'black',
           }}
         >
-          Supprimer
+          <DeleteIcon sx={{ marginRight: 1 , width:18, color: "darkslategrey"}}/>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              borderColor: 'darkgrey',
+              height: '60%',
+              marginX: 1,
+            }}
+          />
+          Archiver
         </MenuItem>
       </Menu>
     </div>

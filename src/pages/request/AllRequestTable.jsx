@@ -17,6 +17,9 @@ import Dot from 'components/@extended/Dot';
 import SentMenu from './SentMenu';
 import { useStateContext } from 'contexts/contextProvider';
 import axis from 'axis';
+import Modify from './Modify';
+import View from './View';
+import Disable from './Disable';
 
 const headCells = [
   { id: 'id_request', align: 'left', label: 'ID Requête' },
@@ -144,8 +147,20 @@ const formatValue = (value) => {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id_request');
   const [page, setPage] = useState(1);
-  const rowsPerPage = 9;
+  const rowsPerPage = 8;
   const [isLoading, setIsLoading] = useState(true);
+  const [openModal, setOpenModal] = useState('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+  
+  const handleAction = (action, employeeId) => {
+    setSelectedEmployeeId(employeeId);
+    setOpenModal(action);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(null);
+    setSelectedEmployeeId(null); // Clear selected employee after closing modal
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -185,7 +200,7 @@ const formatValue = (value) => {
       {/* <TableCell>{formatValue(request.validation?.rejection_reason)}</TableCell> */}
       <TableCell>{formatValue(request.validation?.validation_date)}</TableCell>
       <TableCell align="center">
-        {formatValue(<SentMenu />)}
+        {formatValue(<SentMenu requestId={request.id_request} onAction={handleAction}/>)}
       </TableCell>
     </TableRow>
   ))}
@@ -203,6 +218,15 @@ const formatValue = (value) => {
           color="primary"
         />
       </Box>
+      {openModal === 'modify' && (
+        <Modify employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'view' && (
+        <View employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'disable' && (
+        <Disable employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
+      )}
     </Box>
   );
 }

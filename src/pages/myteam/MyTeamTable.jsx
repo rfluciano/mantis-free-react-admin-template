@@ -1,40 +1,90 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import axis from 'axis';
-import { Box, Stack, Table, TableBody, TableCell, TableContainer, TableRow, Typography, Pagination, Link } from '@mui/material';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Typography,
+  Pagination,
+  Stack,
+} from '@mui/material';
 import SortableTableHead from './SortableTableHead';
 import Dot from 'components/@extended/Dot';
 import ModifyModal from './Modify';
 import ViewModal from './View';
 import DisableModal from './Disable';
-import View from './View';
-import Disable from './Disable';
-import MyTeamMenu from './MyTeamMenu';
+import MyteamMenu from './MyTeamMenu';
 
 const headCells = [
   { id: 'matricule', align: 'left', label: 'Matricule' },
   { id: 'name', align: 'left', label: 'Nom' },
   { id: 'firstname', align: 'left', label: 'Prénom' },
   { id: 'position.title', align: 'left', label: 'Poste' },
-  { id: 'isactive', align: 'left', label: 'Statut' },
-  { id: 'action', align: 'left', label: '' },
+  { id: 'isequipped', align: 'left', label: 'Statut' },
+  { id: 'action', align: 'left', label: 'Action' },
 ];
 
-function MyTeamTable() {
+function getComparator(order, orderBy) {
+  return order === 'desc'
+      ? (a, b) => descendingComparator(a, b, orderBy)
+      : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function descendingComparator(a, b, orderBy) {
+  const valueA = a[orderBy];
+  const valueB = b[orderBy];
+
+  if (valueA === null || valueA === undefined || valueA === '') return 1;
+  if (valueB === null || valueB === undefined || valueB === '') return -1;
+  if (valueB < valueA) return -1;
+  if (valueB > valueA) return 1;
+  return 0;
+}
+
+const StyledValueBox = ({ children }) => (
+  <Box
+    sx={{
+      display: 'inline-block',
+      backgroundColor: 'rgba(173, 216, 230, 0.3)', // Light blue
+      borderRadius: '5px',
+      padding: '4px 8px',
+      fontWeight: 500,
+    }}
+  >
+    {children}
+  </Box>
+);
+
+
+
+function MyTeamTable({ employees }) {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('matricule');
-  const [employees, setEmployees] = useState([]);
   const [openModal, setOpenModal] = useState('');
+  const handleAction = (action, employeeId) => {
+    setSelectedEmployeeId(employeeId);
+    setOpenModal(action);
+  };
+
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return <StyledValueBox>--//--</StyledValueBox>;
+    }
+    return value;
+  };
+  
+
+  const handleCloseModal = () => {
+    setOpenModal(null);
+    setSelectedEmployeeId(null); // Clear selected employee after closing modal
+  };
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
 
-  const [page, setPage] = useState(1); // Current page (1-based index for Pagination)
-  const rowsPerPage = 9; // Max rows per page
-
-  useEffect(() => {
-    axis.get('/employee')
-      .then((response) => setEmployees(response.data.employees))
-      .catch((error) => console.error('Error fetching employee data:', error));
-  }, []);
+  const rowsPerPage = 8;
+  const [page, setPage] = useState(1);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -49,15 +99,7 @@ function MyTeamTable() {
     return sortedData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   }, [order, orderBy, page, employees]);
 
-  const handleAction = (action, employeeId) => {
-    setSelectedEmployeeId(employeeId);
-    setOpenModal(action);
-  };
 
-  const handleCloseModal = () => {
-    setOpenModal(null);
-    setSelectedEmployeeId(null); // Clear selected employee after closing modal
-  };
 
   return (
     <Box sx={{ margin: -2.5, padding: 0 }}>
@@ -67,13 +109,15 @@ function MyTeamTable() {
           <TableBody>
             {sortedAndPaginatedEmployees.map((employee) => (
               <TableRow key={employee.matricule}>
-                <TableCell>{employee.matricule}</TableCell>
-                <TableCell>{employee.name}</TableCell>
-                <TableCell>{employee.firstname}</TableCell>
-                <TableCell>{employee.position.title}</TableCell>
-                <TableCell><EmployeeStatus isactive={employee.isactive} /></TableCell>
+                <TableCell>{formatValue(employee.matricule)}</TableCell>
+                <TableCell>{formatValue(employee.name)}</TableCell>
+                <TableCell>{formatValue(employee.firstname)}</TableCell>
+                <TableCell>{formatValue(employee.position?.title)}</TableCell>
                 <TableCell>
-                  <MyTeamMenu employeeId={employee.matricule} onAction={handleAction} />
+                  <EmployeeStatus isequipped={employee.isequipped} />
+                </TableCell>
+                <TableCell>
+                  <MyteamMenu employeeId={employee.matricule} onAction={handleAction} />
                 </TableCell>
               </TableRow>
             ))}
@@ -92,39 +136,18 @@ function MyTeamTable() {
         <ModifyModal employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
       )}
       {openModal === 'view' && (
-        <View employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
+        <ViewModal employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
       )}
       {openModal === 'disable' && (
-        <Disable employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
+        <DisableModal employeeId={selectedEmployeeId} open={true} onClose={handleCloseModal} />
       )}
     </Box>
   );
 }
 
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function descendingComparator(a, b, orderBy) {
-  const keys = orderBy.split('.');
-  let aValue = a;
-  let bValue = b;
-
-  for (const key of keys) {
-    aValue = aValue[key];
-    bValue = bValue[key];
-  }
-
-  if (bValue < aValue) return -1;
-  if (bValue > aValue) return 1;
-  return 0;
-}
-
-function EmployeeStatus({ isactive }) {
-  const color = isactive ? 'success' : 'warning';
-  const statusText = isactive ? 'Active' : 'Inactive';
+function EmployeeStatus({ isequipped }) {
+  const color = isequipped ? 'success' : 'error';
+  const statusText = isequipped ? 'Equipé' : 'Non équipé';
 
   return (
     <Stack direction="row" spacing={1} alignItems="center">
@@ -133,6 +156,21 @@ function EmployeeStatus({ isactive }) {
     </Stack>
   );
 }
-EmployeeStatus.propTypes = { isactive: PropTypes.bool.isRequired };
+
+EmployeeStatus.propTypes = { isequipped: PropTypes.bool.isRequired };
+
+MyTeamTable.propTypes = {
+  employees: PropTypes.arrayOf(
+    PropTypes.shape({
+      matricule: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      firstname: PropTypes.string.isRequired,
+      position: PropTypes.shape({
+        title: PropTypes.string.isRequired,
+      }).isRequired,
+      isequipped: PropTypes.bool.isRequired,
+    })
+  ).isRequired,
+};
 
 export default MyTeamTable;

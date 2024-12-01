@@ -92,6 +92,10 @@ const ChiefRoutes = {
       path: '/resource',
       element: <Resources />
     },
+    {
+      path:'/profile',
+      element:<Profile/>
+    },
 
   ]
 };

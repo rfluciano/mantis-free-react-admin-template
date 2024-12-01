@@ -75,6 +75,20 @@ function StatusIndicator({ isactive }) {
   );
 }
 
+const StyledValueBox = ({ children }) => (
+  <Box
+    sx={{
+      display: 'inline-block',
+      backgroundColor: 'rgba(173, 216, 230, 0.3)', // Light blue
+      borderRadius: '5px',
+      padding: '4px 8px',
+      fontWeight: 500,
+    }}
+  >
+    {children}
+  </Box>
+);
+
 StatusIndicator.propTypes = {
   isactive: PropTypes.bool.isRequired,
 };
@@ -83,12 +97,19 @@ export default function UserTable({ users }) {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('matricule');
   const [page, setPage] = useState(1);
-  const rowsPerPage = 9;
+  const rowsPerPage = 8;
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
+  };
+
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return <StyledValueBox>--//--</StyledValueBox>;
+    }
+    return value;
   };
 
   const handlePageChange = (event, newPage) => setPage(newPage);
@@ -106,10 +127,10 @@ export default function UserTable({ users }) {
           <TableBody>
             {sortedAndPaginatedUsers.map((user) => (
               <TableRow key={user.matricule}>
-                <TableCell>{user.matricule}</TableCell>
-                <TableCell>{user.username}</TableCell>
+                <TableCell>{formatValue(user.matricule)}</TableCell>
+                <TableCell>{formatValue(user.username)}</TableCell>
                 <TableCell>
-                  {user.discriminator === 'unitychief' ? "Chef d'unité" : 'Administrateur'}
+                  {formatValue(user.discriminator === 'unitychief' ? "Chef d'unité" : 'Administrateur')}
                 </TableCell>
                 <TableCell>
                   <StatusIndicator isactive={user.isactive} />

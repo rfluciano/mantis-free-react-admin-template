@@ -17,36 +17,61 @@ import {
 import { useStateContext } from 'contexts/contextProvider';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import BellOutlined from '@ant-design/icons/BellOutlined';
+import useNotification from 'antd/es/notification/useNotification';
 
 export default function Notification() {
   const { user, messageSuccess } = useStateContext();
   const [notifications, setNotifications] = useState([]);
   const [groupedNotifications, setGroupedNotifications] = useState({});
   const containerRef = useRef(null);
+  const notification = useNotification();
+  useEffect(() => {
+    if (notification?.model === 'Request' ||
+       notification?.model === 'Validation' ||
+         notification?.model === 'Employee') {
+      switch (notification.action) {
+        case 'created':
+        case 'modified':
+        case 'deleted':
+        case 'rejected':
+        case 'aborted':
+        case 'validated':
+          fetchNotifications();  // Call without the searchTerm to see all users
+          break;
+        default:
+          console.warn('Unhandled action:', notification.action);
+      }
+    }
+  }, [notification]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await axis.get(`/notifications/${user.matricule}`);
+      const sortedNotifications = response.data.sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+      );
+
+      // Group notifications by date
+      const grouped = sortedNotifications.reduce((acc, notification) => {
+        const date = new Date(notification.created_at).toLocaleDateString();
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(notification);
+        return acc;
+      }, {});
+      setNotifications(sortedNotifications);
+      setGroupedNotifications(grouped);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      messageSuccess('Error fetching notifications', 'error');
+    }
+  };
+
+
+  
 
   // Fetch notifications
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await axis.get(`/notifications/${user.matricule}`);
-        const sortedNotifications = response.data.sort(
-          (a, b) => new Date(a.created_at) - new Date(b.created_at)
-        );
-
-        // Group notifications by date
-        const grouped = sortedNotifications.reduce((acc, notification) => {
-          const date = new Date(notification.created_at).toLocaleDateString();
-          if (!acc[date]) acc[date] = [];
-          acc[date].push(notification);
-          return acc;
-        }, {});
-        setNotifications(sortedNotifications);
-        setGroupedNotifications(grouped);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-        messageSuccess('Error fetching notifications', 'error');
-      }
-    };
+    
 
     fetchNotifications();
   }, [user.matricule, messageSuccess]);
@@ -86,7 +111,7 @@ export default function Notification() {
           mb: 2,
         }}
       >
-        <Typography variant="h6">Notifications</Typography>
+        <Typography variant="h5">Notifications</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {/* <Badge badgeContent={notifications.filter((n) => !n.is_read).length} color="primary">
             <BellOutlined />

@@ -59,7 +59,7 @@ export default function ProfileTab({ handleClose }) {
         <ListItemText primary="Voir profil" />
       </ListItemButton>
 
-      <ListItemButton
+      {/* <ListItemButton
         selected={selectedIndex === 2}
         onClick={(event) => handleListItemClick(event, 2, `${basePath}/history`)}
       >
@@ -67,7 +67,7 @@ export default function ProfileTab({ handleClose }) {
           <UnorderedListOutlined />
         </ListItemIcon>
         <ListItemText primary="Historique" />
-      </ListItemButton>
+      </ListItemButton> */}
 
       <ListItemButton
         selected={selectedIndex === 3}

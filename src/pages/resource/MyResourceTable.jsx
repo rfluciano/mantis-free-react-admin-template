@@ -48,8 +48,8 @@ const headCells = [
   { id: 'discriminator', align: 'left', label: 'Type' },
   { id: 'description', align: 'left', label: 'Description' },
   { id: 'isavailable', align: 'left', label: 'Disponibilité' },
-  { id: 'id_user_holder', align: 'left', label: 'Propriétaire' },
-  { id: 'action', align: 'left', label: '' },
+  { id: 'id_holder', align: 'left', label: 'Propriétaire' },
+  { id: 'action', align: 'left', label: 'Action' },
 ];
 
 function MyResourceTableHead({ order, orderBy, onRequestSort, onSelectAllClick, numSelected, rowCount }) {
@@ -114,8 +114,23 @@ function AvailabilityIndicator({ isavailable }) {
 }
 
 AvailabilityIndicator.propTypes = {
-  isavailable: PropTypes.bool.isRequired,
+  isavailable: PropTypes.string.isRequired,
 };
+
+const StyledValueBox = ({ children }) => (
+  <Box
+    sx={{
+      display: 'inline-block',
+      backgroundColor: 'rgba(173, 216, 230, 0.3)', // Light blue
+      borderRadius: '5px',
+      padding: '4px 8px',
+      fontWeight: 500,
+    }}
+  >
+    {children}
+  </Box>
+);
+
 
 export default function MyResourceTable() {
   const { user, messageSuccess, messageError, messageDanger } = useStateContext();
@@ -124,7 +139,15 @@ export default function MyResourceTable() {
   const [resources, setResources] = useState([]);
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(1); // Current page
-  const rowsPerPage = 9; 
+  const rowsPerPage = 8; 
+
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return <StyledValueBox>--//--</StyledValueBox>;
+    }
+    return value;
+  };
+  
 
   useEffect(() => {
     axis.get(`/resource/chief/${user.id_user}`)
@@ -156,7 +179,6 @@ export default function MyResourceTable() {
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
-
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, id);
     } else if (selectedIndex === 0) {
@@ -169,16 +191,20 @@ export default function MyResourceTable() {
         selected.slice(selectedIndex + 1)
       );
     }
-
     setSelected(newSelected);
   };
-
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const sortedAndPaginatedResources = useMemo(() => {
     const sortedData = [...resources].sort(getComparator(order, orderBy));
     return sortedData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   }, [order, orderBy, page, resources]);
+
+  const [openModal, setOpenModal] = useState('');
+  const handleAction = (action, employeeId) => {
+    setSelectedRequestId(employeeId);
+    setOpenModal(action);
+  };
 
   return (
     <Box sx={{margin:-2.5, padding:0}}>
@@ -227,13 +253,13 @@ export default function MyResourceTable() {
                       onClick={(event) => handleClick(event, resource.id_resource)}
                     />
                   </TableCell>
-                  <TableCell>{resource.id_resource}</TableCell>
-                  <TableCell>{resource.label}</TableCell>
-                  <TableCell>{resource.discriminator === 'access' ? 'Accès' : 'Equipement'}</TableCell>
-                  <TableCell>{resource.description}</TableCell>
+                  <TableCell>{formatValue(resource.id_resource)}</TableCell>
+                  <TableCell>{formatValue(resource.label)}</TableCell>
+                  <TableCell>{formatValue(resource.discriminator === 'access' ? 'Accès' : 'Equipement')}</TableCell>
+                  <TableCell>{formatValue(resource.description)}</TableCell>
                   <TableCell><AvailabilityIndicator isavailable={resource.isavailable} /></TableCell>
-                  <TableCell>{resource.id_user_holder}</TableCell>
-                  <TableCell><LongMenu employeeId={resource.id_resource} /></TableCell>
+                  <TableCell>{formatValue(resource.id_holder)}</TableCell>
+                  <TableCell><LongMenu employeeId={resource.id_resource} onAction={handleAction}/></TableCell>
                 </TableRow>
               );
             })}
@@ -248,6 +274,15 @@ export default function MyResourceTable() {
           color="primary"
         />
       </Box>
+      {openModal === 'modify' && (
+        <Modify requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'view' && (
+        <View requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
+      {openModal === 'disable' && (
+        <Disable requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
+      )}
     </Box>
   );
 }

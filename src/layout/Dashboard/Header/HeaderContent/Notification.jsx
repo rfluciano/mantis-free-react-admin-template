@@ -29,12 +29,17 @@ import BellOutlined from '@ant-design/icons/BellOutlined';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import { useNavigate } from 'react-router';
 import { useStateContext } from 'contexts/contextProvider';
+import { useNotification } from 'NotificationProvider';
+import iPhone_notification_sound from '../../../../assets/audio/iPhone_notification_sound.mp3';
 
 // Styles
 const avatarSX = { width: 36, height: 36, fontSize: '1rem' };
 const actionSX = { mt: '6px', ml: 1, alignSelf: 'flex-start', transform: 'none' };
 
 export default function Notification() {
+
+// Ajoutez cette ligne dans votre composant
+  const audioRef = useRef(new Audio(iPhone_notification_sound));
   const theme = useTheme();
   const matchesXs = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -44,33 +49,77 @@ export default function Notification() {
   const navigate = useNavigate();
   const { user } = useStateContext();
   const basePath = user?.discriminator === 'unitychief' ? '' : '/admin';
+  const notification = useNotification();
+  useEffect(() => {
+    if (notification?.model === 'Request' ||
+       notification?.model === 'Validation' ||
+         notification?.model === 'Employee') {
+      switch (notification.action) {
+        case 'created':
+        case 'modified':
+        case 'deleted':
+        case 'rejected':
+        case 'aborted':
+        case 'validated':
+          fetchNotifications();  // Call without the searchTerm to see all users
+          break;
+        default:
+          console.warn('Unhandled action:', notification.action);
+      }
+    }
+  }, [notification]);
+  const fetchNotifications = async () => {
+    try {
+      const response = await axis.get(`/notifications/${user.matricule}`);
+      const sortedNotifications = response.data
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 6); // Keep only the 6 most recent notifications
+      setNotifications(sortedNotifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
 
   // Fetch notifications
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await axis.get(`/notifications/${user.matricule}`);
-        const sortedNotifications = response.data
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-          .slice(0, 6); // Keep only the 6 most recent notifications
-        setNotifications(sortedNotifications);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      }
-    };
     fetchNotifications();
   }, [user.matricule]);
 
-  const handleToggle = () => setOpen((prevOpen) => !prevOpen);
+  useEffect(() => {
+    // Vérifiez si des notifications non lues ont été ajoutées
+    const unreadNotifications = notifications.filter((n) => !n.is_read);
+    if (unreadNotifications.length > 0) {
+      audioRef.current.play().catch((error) => {
+        console.error('Audio playback failed:', error);
+      });
+    }
+  }, [notifications]);
+
+  const handleToggle = async () => {
+    setOpen((prevOpen) => !prevOpen);
+  
+    if (!open) {
+      // Si la boîte est en train de s'ouvrir, marquez toutes les notifications comme lues
+      try {
+        await axis.put('/notifications/mark-all-as-read');
+        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      } catch (error) {
+        console.error('Error marking notifications as read:', error);
+      }
+    }
+  };
+  
+
+  // const handleToggle = () => setOpen((prevOpen) => !prevOpen);
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) return;
     setOpen(false);
   };
 
-  const Basy = (event) => {
-    navigate(`${basePath}/notification`).then(() => handleClose(event));
-};
-
+  const Basy = () => {
+    navigate(`${basePath}/notification`).then(handleClose)
+    
+  }
 
   const iconBackColorOpen = 'grey.100';
 
@@ -169,17 +218,14 @@ export default function Notification() {
                         <Divider />
                       </Box>
                     ))}
-                    <ListItemButton
-                      sx={{ textAlign: 'center', py: `${12}px !important` }}
-                      onClick={(event) => Basy(event)}
-                    >
-                        <ListItemText
-                            primary={
-                                <Typography variant="h6" color="primary">
-                                    Voir tous
-                                </Typography>
-                            }
-                        />
+                    <ListItemButton sx={{ textAlign: 'center', py: `${12}px !important` }} onClick={() => Basy()}>
+                      <ListItemText
+                        primary={
+                          <Typography variant="h6" color="primary">
+                            Voir tous
+                          </Typography>
+                        }
+                      />
                     </ListItemButton>
                   </List>
                 </MainCard>

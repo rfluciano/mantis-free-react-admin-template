@@ -81,7 +81,7 @@ export default function AjouterUtilisateur() {
       handleClose();
     } catch (error) {
       console.error(error);
-      alert('Erreur lors de la création de l\'utilisateur');
+      console.log('Erreur lors de la création de l\'utilisateur');
     }
   };
 
