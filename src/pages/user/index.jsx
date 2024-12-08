@@ -27,7 +27,6 @@ export default function User() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filteredUsers, setFilteredUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const notification = useNotification();
   useEffect(() => {
@@ -44,6 +43,7 @@ export default function User() {
     }
   }, [notification]); // Use the notification hook
 
+  const [isLoading, setIsLoading] = useState(true);
   const fetchFilteredUsers = async (query = '') => {
     setIsLoading(true);
     setError(null);
@@ -95,9 +95,10 @@ export default function User() {
       <Grid item xs={12}>
         <MainCard sx={{ p: 0, width: '100%' }}>
           {isLoading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
-              <CircularProgress />
-            </Box>
+            <Box sx={{ textAlign: 'center', }}>
+            <CircularProgress />
+            <Typography>Chargement...</Typography>
+          </Box>
           ) : error ? (
             <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
               <Typography variant="body1" color="error">{error}</Typography>

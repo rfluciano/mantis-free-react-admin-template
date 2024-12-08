@@ -99,9 +99,10 @@ export default function Position() {
       <Grid item xs={12}>
         <MainCard sx={{ p: 0, width: '100%' }}>
           {isLoading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
-              <CircularProgress />
-            </Box>
+            <Box sx={{ textAlign: 'center', }}>
+            <CircularProgress />
+            <Typography>Chargement...</Typography>
+          </Box>
           ) : error ? (
             <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
               <Typography variant="body1" color="error">{error}</Typography>

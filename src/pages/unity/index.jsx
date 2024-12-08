@@ -24,6 +24,7 @@ export default function Unity() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({}); // This will store the applied filters
+  const [isLoading, setIsLoading] = useState(true);
 
   // Search handler
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
@@ -102,7 +103,7 @@ export default function Unity() {
       </Grid>
 
       {/* Unity Filter Modal */}
-      <UnityFilter 
+      <UnityFilter
         open={isFilterOpen} 
         onClose={() => setIsFilterOpen(false)} 
         onApply={handleFilterApply} // Pass callback to apply the filter

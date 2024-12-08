@@ -115,12 +115,14 @@ export default function Request() {
             '& > .MuiBox-root': {
               margin: 0,
             },
+            // height: "75vh"
           }}
         >
           {isLoading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
-              <CircularProgress />
-            </Box>
+            <Box sx={{ textAlign: 'center', }}>
+            <CircularProgress />
+            <Typography>Chargement...</Typography>
+          </Box>
           ) : filteredRequests.length === 0 ? (
             <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
               <Typography variant="body1">Aucune donnée trouvée.</Typography>

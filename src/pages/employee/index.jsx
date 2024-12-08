@@ -129,9 +129,10 @@ export default function Employee() {
           }}
         >
           {isLoading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
-              <CircularProgress />
-            </Box>
+            <Box sx={{ textAlign: 'center', }}>
+            <CircularProgress />
+            <Typography>Chargement...</Typography>
+          </Box>
           ) : employee.length === 0 ? (
             <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 5 }}>
               <Typography variant="body1">Aucune donnée trouvée.</Typography>

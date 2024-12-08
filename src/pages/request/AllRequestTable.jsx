@@ -178,7 +178,7 @@ const formatValue = (value) => {
   return (
     <Box sx={{ margin: -2.5, padding: 0 }}>
       <TableContainer>
-        <Table>
+        <Table >
           <RequestTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>
   {paginatedRequests.map((request) => (
