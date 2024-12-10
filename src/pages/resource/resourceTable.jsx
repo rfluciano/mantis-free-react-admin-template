@@ -1,46 +1,38 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import axis from 'axis';
-import Stack from '@mui/material/Stack';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Button from '@mui/material/Button';
-import Pagination from '@mui/material/Pagination'; // Here is the pagination component
+import {
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Box,
+  TableSortLabel,
+  Checkbox,
+  Button,
+  Pagination,
+  TextField,
+  MenuItem,
+} from '@mui/material';
 import LongMenu from './MyResourceMenu';
 import { useStateContext } from 'contexts/contextProvider';
 import Dot from 'components/@extended/Dot';
-import ResourceMenu from './RessourceMenu';
 
+// Comparator functions
 function descendingComparator(a, b, orderBy) {
-  const valueA = a[orderBy];
-  const valueB = b[orderBy];
-
-  // Handle null or empty values
-  const isValueAEmpty = valueA === null || valueA === undefined || valueA === '';
-  const isValueBEmpty = valueB === null || valueB === undefined || valueB === '';
-
-  if (isValueAEmpty && !isValueBEmpty) return 1;  // `a` is empty, place it lower
-  if (!isValueAEmpty && isValueBEmpty) return -1; // `b` is empty, place it lower
-  if (isValueAEmpty && isValueBEmpty) return 0;   // Both are empty, treat as equal
-
-  // Standard descending comparison
-  if (valueB < valueA) return -1;
-  if (valueB > valueA) return 1;
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
   return 0;
 }
 
 function getComparator(order, orderBy) {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
+    : (a, b) => -descendingComparator(a, orderBy);
 }
 
 const headCells = [
@@ -50,7 +42,6 @@ const headCells = [
   { id: 'description', align: 'left', label: 'Description' },
   { id: 'isavailable', align: 'left', label: 'Disponibilité' },
   { id: 'id_user_chief', align: 'left', label: 'Responsable' },
-  { id: 'id_holder', align: 'left', label: 'Propriétaire' },
   { id: 'action', align: 'left', label: 'Action' },
 ];
 
@@ -97,8 +88,21 @@ ResourceTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
+const StyledValueBox = ({ children }) => (
+  <Box
+    sx={{
+      display: 'inline-block',
+      backgroundColor: 'rgba(173, 216, 230, 0.3)', // Light blue
+      borderRadius: '5px',
+      padding: '4px 8px',
+      fontWeight: 500,
+    }}
+  >
+    {children}
+  </Box>
+);
+
 function AvailabilityIndicator({ isavailable }) {
-  // Map the availability status to color and title
   const statusMap = {
     Libre: { color: 'success', title: 'Disponible' },
     Pend: { color: 'warning', title: 'En attente' },
@@ -119,57 +123,20 @@ AvailabilityIndicator.propTypes = {
   isavailable: PropTypes.string.isRequired,
 };
 
-const StyledValueBox = ({ children }) => (
-  <Box
-    sx={{
-      display: 'inline-block',
-      backgroundColor: 'rgba(173, 216, 230, 0.3)', // Light blue
-      borderRadius: '5px',
-      padding: '4px 8px',
-      fontWeight: 500,
-    }}
-  >
-    {children}
-  </Box>
-);
-
-
-export default function ResourceTable() {
-  const { user, messageSuccess, messageError } = useStateContext();
+export default function ResourceTable({ beneficiaryMatricule, resources }) {
+  const { user, messageError, messageSuccess } = useStateContext();
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id_resource');
-  const [resources, setResources] = useState([]);
   const [selected, setSelected] = useState([]);
-  const [openModal, setOpenModal] = useState('');
-  const handleAction = (action, employeeId) => {
-    setSelectedRequestId(employeeId);
-    setOpenModal(action);
-  };
-
-  const formatValue = (value) => {
-    if (value === null || value === undefined || value === '') {
-      return <StyledValueBox>--//--</StyledValueBox>;
-    }
-    return value;
-  };
-  
-
-  const handleCloseModal = () => {
-    setOpenModal(null);
-    setSelectedRequestId(null); // Clear selected employee after closing modal
-  };
-  const [selectedEmployeeId, setSelectedRequestId] = useState(null);
-  const [page, setPage] = useState(1); // Use 1-based page
-  const rowsPerPage = 8; // You can set rows per page as needed
+  const [page, setPage] = useState(1);
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+  const rowsPerPage = 8;
 
   useEffect(() => {
-    axis.get(`/resource`)
-      .then((response) => {
-        setResources(response.data);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch resources:', error);
-      });
+    axis.get('/employee')
+      .then((response) => setEmployees(response.data.employees))
+      .catch((error) => console.error('Failed to fetch employees:', error));
   }, []);
 
   const handleRequestSort = (event, property) => {
@@ -180,11 +147,10 @@ export default function ResourceTable() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = resources.map((resource) => resource.id_resource);
-      setSelected(newSelecteds);
-      return;
+      setSelected(resources.map((resource) => resource.id_resource));
+    } else {
+      setSelected([]);
     }
-    setSelected([]);
   };
 
   const handleClick = (event, id) => {
@@ -197,7 +163,7 @@ export default function ResourceTable() {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
+    } else {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
         selected.slice(selectedIndex + 1)
@@ -207,37 +173,77 @@ export default function ResourceTable() {
     setSelected(newSelected);
   };
 
-  const handlePageChange = (event, newPage) => {
-    setPage(newPage);
+  const handlePageChange = (event, newPage) => setPage(newPage);
+
+  const handleBulkAssign = () => {
+    const beneficiary = beneficiaryMatricule || selectedEmployee;
+
+    if (!beneficiary) {
+      messageError('Veuillez sélectionner un bénéficiaire.');
+      return;
+    }
+
+    const requests = selected.map((idResource) => ({
+      id_resource: idResource,
+      id_beneficiary: beneficiary,
+      id_requester: user.matricule,
+    }));
+
+    axis
+      .post('/request/bulk', { requests })
+      .then(() => {
+        messageSuccess('Ressources attribuées avec succès.');
+        setSelected([]);
+        setSelectedEmployee('');
+      })
+      .catch(() => {
+        messageError("Échec de l'attribution des ressources.");
+      });
   };
 
-  const isSelected = (id) => selected.indexOf(id) !== -1;
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return <StyledValueBox>--//--</StyledValueBox>;
+    }
+    return value;
+  };
 
   const sortedAndPaginatedResources = useMemo(() => {
+    if (!resources) return [];
     const sortedData = [...resources].sort(getComparator(order, orderBy));
-    return sortedData.slice((page - 1) * rowsPerPage, page * rowsPerPage); // Adjust for 1-based page
+    return sortedData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   }, [order, orderBy, page, resources]);
 
   return (
-    <Box sx={{margin:-2.5, padding:0}}>
+    <Box sx={{ margin: -2.5, padding: 0 }}>
       {selected.length > 0 && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => console.log('Selected Resource IDs:', selected)}
-          sx={{ marginBottom: 2 }}
-        >
-          Action Button
-        </Button>
+        <Stack direction="row" spacing={8} alignItems="center" sx={{ mb: 2 , margin: '8px 0 0 8px'}}>
+          <Typography variant="h6">Attribuer à :</Typography>
+          {beneficiaryMatricule ? (
+            <Typography variant="subtitle1">{beneficiaryMatricule}</Typography>
+          ) : (
+            <TextField
+              select
+              value={selectedEmployee}
+              onChange={(e) => setSelectedEmployee(e.target.value)}
+              variant="outlined"
+              label="Bénéficiaire"
+              sx={{ minWidth: 200 }}
+            >
+              {employees.map((employee) => (
+                <MenuItem key={employee.matricule} value={employee.matricule}>
+                  {`${employee.matricule} - ${employee.name}`}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+          <Button variant="contained" color="primary" onClick={handleBulkAssign}>
+            Attribuer
+          </Button>
+        </Stack>
       )}
-      <TableContainer
-        sx={{
-          width: '100%',
-          overflowX: 'auto',
-          '& td, & th': { whiteSpace: 'nowrap' },
-        }}
-      >
-        <Table aria-labelledby="tableTitle">
+      <TableContainer>
+        <Table>
           <ResourceTableHead
             order={order}
             orderBy={orderBy}
@@ -248,7 +254,7 @@ export default function ResourceTable() {
           />
           <TableBody>
             {sortedAndPaginatedResources.map((resource) => {
-              const isItemSelected = isSelected(resource.id_resource);
+              const isItemSelected = selected.indexOf(resource.id_resource) !== -1;
               return (
                 <TableRow
                   key={resource.id_resource}
@@ -267,35 +273,40 @@ export default function ResourceTable() {
                   </TableCell>
                   <TableCell>{formatValue(resource.id_resource)}</TableCell>
                   <TableCell>{formatValue(resource.label)}</TableCell>
-                  <TableCell>{formatValue(resource.discriminator === 'Accès' ? 'Accès' : 'Equipement')}</TableCell>
+                  <TableCell>{formatValue(resource.discriminator)}</TableCell>
                   <TableCell>{formatValue(resource.description)}</TableCell>
-                  <TableCell><AvailabilityIndicator isavailable={resource.isavailable} /></TableCell>
+                  <TableCell>
+                    <AvailabilityIndicator isavailable={resource.isavailable} />
+                  </TableCell>
                   <TableCell>{formatValue(resource.id_user_chief)}</TableCell>
-                  <TableCell>{formatValue(resource.id_holder)}</TableCell>
-                  <TableCell><ResourceMenu ResourceId={resource.id_resource} handleAction/></TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
       </TableContainer>
-      <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
+      <Stack spacing={2} alignItems="center" sx={{ mt: 2 }}>
         <Pagination
           count={Math.ceil(resources.length / rowsPerPage)}
           page={page}
           onChange={handlePageChange}
           color="primary"
         />
-      </Box>
-      {openModal === 'modify' && (
-        <Modify requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
-      )}
-      {openModal === 'view' && (
-        <View requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
-      )}
-      {openModal === 'disable' && (
-        <Disable requestId={selectedRequestId} open={true} onClose={handleCloseModal} />
-      )}
+      </Stack>
     </Box>
   );
 }
+
+ResourceTable.propTypes = {
+  beneficiaryMatricule: PropTypes.string,
+  resources: PropTypes.arrayOf(
+    PropTypes.shape({
+      id_resource: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      discriminator: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+      isavailable: PropTypes.string.isRequired,
+      id_user_chief: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+};

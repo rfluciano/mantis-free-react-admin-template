@@ -29,6 +29,8 @@ export default function Request() {
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const notification = useNotification();
+  const RequestColumns = ['id_request', 'id_requester', 'id_receiver', 'id_resource', 'validation.status', 'validation.validation_date'];
+
   useEffect(() => {
     if (notification?.model === 'Request') {
       switch (notification.action) {
@@ -103,7 +105,7 @@ export default function Request() {
           <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>
             <FilterList />
           </IconButton>
-          <ExportPopover />
+          <ExportPopover data={filteredRequests} columns={RequestColumns} />
           {/* <ImportPopover /> */}
         </Box>
       </Grid>

@@ -98,7 +98,7 @@ export default function PositionTable({ positions }) {
     setSelectedEmployeeId(null); // Clear selected employee after closing modal
   };
 
-  const rowsPerPage = 8;
+  const rowsPerPage = 9;
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';

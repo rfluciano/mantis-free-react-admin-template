@@ -18,9 +18,9 @@ const style = (isSmallScreen, isVisible) => ({
 });
 
 export default function Validate({ requestId, open, onClose }) {
-  const {user} = useStateContext();
+  const {user, messageSuccess } = useStateContext();
   const matricule = user.matricule
-  const [validation, setvalidation] = useState({
+  const [validation, setValidation] = useState({
     id_request: requestId,
     delivery_date:'',
     id_validator: matricule
@@ -29,15 +29,16 @@ export default function Validate({ requestId, open, onClose }) {
   const isSmallScreen = window.innerWidth <= 600;
 
   const handleChange = (e) => {
-    setEmployee((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
+    setValidation((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axis.put(`/validation/validate/${requestId}`);
+      await axis.put(`/validation/validate/${requestId}`, validation);
       console.log('Requête validée avec succès');
-      onClose(); // Close the modal after updating
+      onClose();
+      messageSuccess("La requête a été validé avec succès") // Close the modal after updating
     } catch (err) {
       console.error('Error updating employee:', err);
       console.log("Une erreur s'est produit durant la validation dela requête.");

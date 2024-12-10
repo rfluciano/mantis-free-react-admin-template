@@ -7,7 +7,7 @@ import UserMenu from './UserMenu'; // Replace with appropriate import path
 // Define the table headers
 const headCells = [
   { id: 'matricule', align: 'left', label: 'Matricule' },
-  { id: 'username', align: 'left', label: 'Nom' },
+  { id: 'username', align: 'left', label:"Nom d'utilisateur" },
   { id: 'discriminator', align: 'left', label: 'Rôle' },
   { id: 'isactive', align: 'left', label: 'Statut' },
   { id: 'action', align: 'center', label: 'Action' },
@@ -97,7 +97,7 @@ export default function UserTable({ users }) {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('matricule');
   const [page, setPage] = useState(1);
-  const rowsPerPage = 8;
+  const rowsPerPage = 9;
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';

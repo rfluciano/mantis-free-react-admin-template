@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Typography, Modal, Grid, TextField, MenuItem, CircularProgress } from '@mui/material';
 import axis from 'axis';
+import { useStateContext } from 'contexts/contextProvider';
 
 const style = (isSmallScreen, isVisible) => ({
   position: 'absolute',
@@ -17,6 +18,7 @@ const style = (isSmallScreen, isVisible) => ({
 });
 
 export default function Modify({ requestId, open, onClose }) {
+  const {messageSuccess} = useStateContext()
   const [isVisible, setIsVisible] = useState(false);
   const [request, setRequest] = useState({
     id_request: '',
@@ -31,40 +33,45 @@ export default function Modify({ requestId, open, onClose }) {
   const [employees, setEmployees] = useState([]);
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 600);
 
-  const isSmallScreen = window.innerWidth <= 600;
+  useEffect(() => {
+    const handleResize = () => setIsSmallScreen(window.innerWidth <= 600);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Fetch initial data
   useEffect(() => {
     if (requestId) {
       const fetchRequestData = async () => {
         try {
-          const [requestResponse, usersResponse, employeesResponse] = await Promise.all([
+          const [requestResponse, usersResponse, employeesResponse, resourceResponse] = await Promise.all([
             axis.get(`/request/${requestId}`),
             axis.get('/users'),
             axis.get('/employee'),
+            axis.get('/resource'),
           ]);
 
-          const requestData = requestResponse.data || {};
+          const requestData = requestResponse?.data || {};
           setRequest({
             id_request: requestId,
-            id_resource: requestData.resource?.matricule || '',
+            id_resource: requestData.resource?.id_resource || '',
             id_receiver: requestData.receiver?.matricule || '',
             id_beneficiary: requestData.beneficiary?.matricule || '',
             delivery_date: requestData.validation?.delivery_date || '',
             status: requestData.validation?.status || '',
           });
 
-          setUsers(usersResponse.data || []);
-          setEmployees(employeesResponse.data || []);
-          setResources(requestResponse.data.resources || []); // Ajout des ressources si nécessaire
+          setUsers(usersResponse?.data?.users || []);
+          setEmployees(employeesResponse?.data?.employees || []);
+          setResources(resourceResponse?.data || []);
         } catch (error) {
           console.error('Error fetching data:', error);
         } finally {
           setLoading(false);
         }
       };
-
       fetchRequestData();
     }
   }, [requestId]);
@@ -84,7 +91,9 @@ export default function Modify({ requestId, open, onClose }) {
         status: request.status,
       };
       await axis.put(`/request/update/${requestId}`, updatedRequest);
-      onClose(); // Close modal on success
+      onClose();
+      messageSuccess("Requête modifié avec succès")
+      // Close modal on success
     } catch (error) {
       console.error('Error updating request:', error);
     }
@@ -101,7 +110,7 @@ export default function Modify({ requestId, open, onClose }) {
     else handleModalClose();
   }, [open]);
 
-  if (loading) {
+  if (loading || !resources.length || !users.length || !employees.length) {
     return (
       <Modal open={open} onClose={handleModalClose}>
         <Box sx={{ ...style(isSmallScreen, true), textAlign: 'center' }}>
@@ -111,6 +120,7 @@ export default function Modify({ requestId, open, onClose }) {
       </Modal>
     );
   }
+  
 
   return (
     <Modal open={open} onClose={handleModalClose}>
@@ -123,13 +133,13 @@ export default function Modify({ requestId, open, onClose }) {
             <Typography>ID Ressource :</Typography>
             <TextField
               select
-              value={request.id_resource}
+              value={request.id_resource || ''}
               onChange={handleChange('id_resource')}
               fullWidth
             >
               {resources.map((resource) => (
-                <MenuItem key={resource.id} value={resource.id}>
-                  {resource.label}
+                <MenuItem key={resource.id_resource} value={resource.id_resource}>
+                  {`${resource.id_resource} - ${resource.label} `}
                 </MenuItem>
               ))}
             </TextField>
@@ -138,13 +148,13 @@ export default function Modify({ requestId, open, onClose }) {
             <Typography>Receveur :</Typography>
             <TextField
               select
-              value={request.id_receiver}
+              value={request.id_receiver || ''}
               onChange={handleChange('id_receiver')}
               fullWidth
             >
               {users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.username}
+                <MenuItem key={user.matricule} value={user.matricule}>
+                  {` ${user.matricule} - ${user.username}`}
                 </MenuItem>
               ))}
             </TextField>
@@ -153,33 +163,38 @@ export default function Modify({ requestId, open, onClose }) {
             <Typography>Bénéficiaire :</Typography>
             <TextField
               select
-              value={request.id_beneficiary}
+              value={request.id_beneficiary || ''}
               onChange={handleChange('id_beneficiary')}
               fullWidth
             >
               {employees.map((employee) => (
-                <MenuItem key={employee.employeeId} value={employee.employeeId}>
+                <MenuItem key={employee.matricule} value={employee.matricule}>
                   {`${employee.matricule} - ${employee.name}`}
                 </MenuItem>
               ))}
             </TextField>
           </Grid>
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <Typography>Date de livraison :</Typography>
             <TextField
               type="date"
-              value={request.delivery_date}
-              onChange={handleChange('delivery_date')}
+              value={request.validation.delivery_date || ''}
+              onChange={handleChange('validation.delivery_date')}
               fullWidth
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={12}>
             <Typography>Statut :</Typography>
             <TextField
-              value={request.status}
+              select
+              value={request.status || ''}
               onChange={handleChange('status')}
               fullWidth
-            />
+            >
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="Approved">Approved</MenuItem>
+              <MenuItem value="Rejected">Rejected</MenuItem>
+            </TextField>
           </Grid>
         </Grid>
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>

@@ -21,6 +21,8 @@ import {
 import LongMenu from './MyResourceMenu';
 import { useStateContext } from 'contexts/contextProvider';
 import Dot from 'components/@extended/Dot';
+import ResourceMenu from './RessourceMenu';
+import AvailableResourceMenu from './AvailableResourceMenu';
 
 // Comparator functions
 function descendingComparator(a, b, orderBy) {
@@ -264,13 +266,16 @@ export default function AvailableResourceTable({ beneficiaryMatricule, resources
                   aria-checked={isItemSelected}
                   selected={isItemSelected}
                 >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={isItemSelected}
-                      onClick={(event) => handleClick(event, resource.id_resource)}
-                    />
-                  </TableCell>
+<TableCell padding="checkbox">
+  <Checkbox
+    color="primary"
+    checked={isItemSelected}
+    onClick={(event) => {
+      event.stopPropagation(); // Prevent row selection
+      handleClick(event, resource.id_resource);
+    }}
+  />
+</TableCell>
                   <TableCell>{formatValue(resource.id_resource)}</TableCell>
                   <TableCell>{formatValue(resource.label)}</TableCell>
                   <TableCell>{formatValue(resource.discriminator)}</TableCell>
@@ -279,6 +284,9 @@ export default function AvailableResourceTable({ beneficiaryMatricule, resources
                     <AvailabilityIndicator isavailable={resource.isavailable} />
                   </TableCell>
                   <TableCell>{formatValue(resource.id_user_chief)}</TableCell>
+                  <TableCell align="center">
+                  <AvailableResourceMenu />
+                </TableCell>
                 </TableRow>
               );
             })}

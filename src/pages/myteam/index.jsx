@@ -29,6 +29,8 @@
     const [employee, setEmployee] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const notification = useNotification();
+    const employeeColumns = ['matricule', 'name', 'firstname', 'id_position', 'date_entry'];
+
     useEffect(() => {
       if (notification?.model === 'Employee') {
         switch (notification.action) {
@@ -113,7 +115,7 @@
               <FilterList />
             </IconButton>
             {/* Export Popover */}
-            <ExportPopover />
+            <ExportPopover data={employee} columns={employeeColumns} />
             {/* Import Popover */}
             <ImportPopover />
           </Box>

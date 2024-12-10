@@ -83,7 +83,7 @@ export default function UnityTable() {
   const [orderBy, setOrderBy] = useState('id_unity');
   const [unity, setUnity] = useState([]);
   const [page, setPage] = useState(1);
-  const rowsPerPage = 8;
+  const rowsPerPage = 9;
 
   useEffect(() => {
     axis

@@ -60,7 +60,7 @@ export default function Notification() {
       console.error('Error fetching notifications:', error);
     }
   };
-
+  
   useEffect(() => {
     fetchNotifications();
   }, [user.matricule]);

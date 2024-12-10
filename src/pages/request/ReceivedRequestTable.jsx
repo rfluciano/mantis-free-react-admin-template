@@ -149,7 +149,7 @@ const formatValue = (value) => {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id_request');
   const [page, setPage] = useState(1);
-  const rowsPerPage = 8;
+  const rowsPerPage = 9;
   const [isLoading, setIsLoading] = useState(true);
   const [openModal, setOpenModal] = useState('');
   const [selectedRequestId, setSelectedRequestId] = useState(null);

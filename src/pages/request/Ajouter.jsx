@@ -48,9 +48,9 @@ export default function AjouterRequete() {
     const fetchData = async () => {
       try {
         const resourcesResponse = await axis.get('/resource/mandeha');
-        const employeeResponse = await axis.get('/employee');
+        const employeeResponse = await axis.get(`/employee/chief/${user.matricule}`);
         setResources(resourcesResponse.data?.resource);
-        setEmployees(employeeResponse.data.employees);
+        setEmployees(employeeResponse.data);
       } catch (err) {
         console.error(err);
       }

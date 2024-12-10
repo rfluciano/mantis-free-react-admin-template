@@ -42,15 +42,20 @@ const Profile = () => {
             User Information
           </Typography>
           <Box component="form" noValidate autoComplete="off" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Avatar
+          {/* <Avatar
               alt={`${firstname} ${name}`}
               sx={{ width: 120, height: 120, marginBottom: 2 }}
               src="/placeholder-image.jpg" // Replace with actual image path when available
-            />
+            /> */}
+            <Grid item xs={14} sm={'auto'}>
+              <Typography>Matricule :</Typography>
+              <TextField value={` ${user.matricule}`} InputProps={{ readOnly: true }} fullWidth />
+            </Grid>
             <Grid item xs={14} sm={'auto'}>
               <Typography>Nom d'utilisateur :</Typography>
               <TextField value={` ${username}`} InputProps={{ readOnly: true }} fullWidth />
-            </Grid>            <Grid item xs={14} sm={'auto'}>
+            </Grid>
+            <Grid item xs={14} sm={'auto'}>
               <Typography>Rôle :</Typography>
               <TextField value={` ${discriminator}`} InputProps={{ readOnly: true }} fullWidth />
             </Grid>

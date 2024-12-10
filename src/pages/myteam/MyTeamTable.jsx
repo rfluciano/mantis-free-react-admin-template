@@ -83,7 +83,7 @@ function MyTeamTable({ employees }) {
   };
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
 
-  const rowsPerPage = 8;
+  const rowsPerPage = 9;
   const [page, setPage] = useState(1);
 
   const handleRequestSort = (event, property) => {

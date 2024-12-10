@@ -29,6 +29,8 @@ export default function User() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [error, setError] = useState(null);
   const notification = useNotification();
+  const UserColumns = ['matricule', 'username', 'isactive', 'discriminator'];
+
   useEffect(() => {
     if (notification?.model === 'User') {
       switch (notification.action) {
@@ -87,7 +89,7 @@ export default function User() {
           <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>
             <FilterList />
           </IconButton>
-          <ExportPopover />
+          <ExportPopover data={filteredUsers} columns={UserColumns} />
           {/* <ImportPopover /> */}
         </Box>
       </Grid>

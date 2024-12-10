@@ -28,6 +28,8 @@ export default function Position() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const notification = useNotification();
+  const PositionColumns = ['id_position', 'title', 'type', 'isavailable', 'id_unity'];
+
   
 
   useEffect(() => {
@@ -91,7 +93,7 @@ export default function Position() {
           <IconButton aria-label="Filtrer" onClick={() => setIsFilterOpen(true)}>
             <FilterList />
           </IconButton>
-          <ExportPopover />
+          <ExportPopover data={positions} columns={PositionColumns} />
           <ImportPopover />
         </Box>
       </Grid>
